@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "#fff8f7",
+              primary: "#146a5c",
+              "primary-container": "#86d2c1",
+              "surface-container-low": "#f9f2f2",
+              "outline-variant": "#bec9c5",
+              outline: "#6f7976",
+              error: "#ba1a1a",
+            },
+            borderRadius: { xl: "0.75rem", full: "9999px" },
+            spacing: { gutter: "20px", "container-max": "1280px" },
+          },
+        },
+      };
+    </script>
+    <style>
+      body { font-family: "Plus Jakarta Sans", sans-serif; }
+      .soft-glow { box-shadow: 0 4px 20px rgba(134, 210, 193, 0.08); }
+    </style>
+
+    <script src="supabase-config.js"></script>
+    <script src="auth.js" defer></script>
+    <script src="inventory-app.js" defer></script>
+
+    <title>Inventory - BeebBeeb Admin</title>
+  </head>
+  <body class="bg-background text-slate-900 min-h-screen">
+    <!-- Top bar -->
+    <header
+      class="bg-white/80 backdrop-blur-md border-b border-teal-50/50 shadow-[0_4px_20px_rgba(134,210,193,0.08)] sticky top-0 z-50"
+    >
+      <div class="max-w-[1280px] mx-auto px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl font-extrabold text-primary">BeebBeeb</span>
+          <span class="text-sm text-outline">Admin</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a
+            href="home.html"
+            class="px-3 py-2 rounded-full text-sm text-outline hover:bg-surface-container-low transition-colors"
+            >Customer site</a
+          >
+          <button
+            data-bb-logout
+            class="px-4 py-2 rounded-full bg-primary text-white font-bold hover:opacity-90 transition"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex">
+      <!-- Sidebar -->
+      <aside
+        class="hidden md:flex h-[calc(100vh-56px)] w-64 border-r border-slate-100 bg-white sticky top-14 flex-col gap-2 p-4"
+      >
+        <div class="mb-3">
+          <h2 class="text-lg font-black text-primary">BeebBeeb Admin</h2>
+          <p class="text-xs text-slate-500">Inventory & orders</p>
+        </div>
+        <nav class="space-y-1">
+          <a
+            class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
+            href="admin.html"
+          >
+            <span class="material-symbols-outlined">styler</span>
+            <span>Products</span>
+          </a>
+          <a
+            class="flex items-center gap-3 p-3 bg-primary-container/30 text-primary rounded-xl font-semibold"
+            href="inventory.html"
+          >
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span>Inventory</span>
+          </a>
+          <a
+            class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
+            href="admin-orders.html"
+          >
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span>Orders</span>
+          </a>
+          <a
+            class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
+            href="admin-sales.html"
+          >
+            <span class="material-symbols-outlined">bar_chart</span>
+            <span>Sales</span>
+          </a>
+          <a
+            class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
+            href="admin-support.html"
+          >
+            <span class="material-symbols-outlined">support_agent</span>
+            <span>Support</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main -->
+      <main class="flex-1 max-w-[1280px] mx-auto w-full px-6 py-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-3xl font-black">Inventory</h1>
+            <p class="text-sm text-outline">Update stock quantities across your catalog.</p>
+          </div>
+          <div class="flex gap-2">
+            <input
+              id="bb-inv-search"
+              class="bg-surface-container-low border-none rounded-full py-2 px-4 text-sm w-72 focus:ring-2 focus:ring-primary-container transition-all"
+              placeholder="Search product title..."
+              type="text"
+            />
+            <button
+              id="bb-inv-refresh"
+              class="px-4 py-2 rounded-full border border-outline-variant/60 bg-white hover:bg-surface-container-low transition-colors text-sm font-bold"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div class="bg-white p-5 rounded-xl border border-outline-variant/30 soft-glow">
+            <div class="text-xs font-bold text-outline uppercase">Total Products</div>
+            <div id="bb-stat-total" class="text-2xl font-black mt-1">-</div>
+          </div>
+          <div class="bg-white p-5 rounded-xl border border-outline-variant/30 soft-glow">
+            <div class="text-xs font-bold text-outline uppercase">Low Stock (&lt;= 10)</div>
+            <div id="bb-stat-low" class="text-2xl font-black mt-1 text-error">-</div>
+          </div>
+          <div class="bg-white p-5 rounded-xl border border-outline-variant/30 soft-glow">
+            <div class="text-xs font-bold text-outline uppercase">Out of Stock</div>
+            <div id="bb-stat-out" class="text-2xl font-black mt-1">-</div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-outline-variant/30 soft-glow overflow-auto">
+          <div class="p-4 border-b border-outline-variant/20 flex items-center justify-between">
+            <h3 class="font-bold">Stock table</h3>
+            <div id="bb-inv-msg" class="text-sm text-error"></div>
+          </div>
+          <table class="w-full text-left">
+            <thead class="bg-surface-container-low text-xs text-outline uppercase">
+              <tr>
+                <th class="px-4 py-3">Product</th>
+                <th class="px-4 py-3 text-right">By color</th>
+                <th class="px-4 py-3 text-right">Adjust (+)</th>
+              </tr>
+            </thead>
+            <tbody id="bb-inv-rows" class="divide-y divide-outline-variant/20"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+

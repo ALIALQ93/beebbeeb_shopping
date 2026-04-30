@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html dir="ltr" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .soft-glow {
+            box-shadow: 0 4px 20px rgba(134, 210, 193, 0.08);
+        }
+        .inner-squish {
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#bec9c5",
+                        "secondary-fixed-dim": "#aacaea",
+                        "on-secondary-fixed-variant": "#294964",
+                        "secondary": "#42617d",
+                        "on-surface-variant": "#3f4946",
+                        "background": "#fff8f7",
+                        "tertiary-fixed-dim": "#d2c791",
+                        "inverse-surface": "#333030",
+                        "surface-dim": "#dfd8d8",
+                        "on-secondary-fixed": "#001d32",
+                        "surface": "#fff8f7",
+                        "outline": "#6f7976",
+                        "on-tertiary-fixed-variant": "#4e471d",
+                        "surface-variant": "#e8e1e1",
+                        "inverse-primary": "#89d5c4",
+                        "primary-fixed-dim": "#89d5c4",
+                        "surface-bright": "#fff8f7",
+                        "on-primary-fixed-variant": "#005045",
+                        "tertiary-container": "#d0c58f",
+                        "surface-container-high": "#ede7e6",
+                        "on-secondary-container": "#43627e",
+                        "surface-container-highest": "#e8e1e1",
+                        "on-tertiary-fixed": "#201c00",
+                        "surface-container-low": "#f9f2f2",
+                        "on-surface": "#1d1b1b",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#cde5ff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#efe3ab",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#675f32",
+                        "inverse-on-surface": "#f6efef",
+                        "on-tertiary-container": "#595126",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#146a5c",
+                        "surface-container": "#f3ecec",
+                        "primary-container": "#86d2c1",
+                        "primary-fixed": "#a4f1df",
+                        "primary": "#146a5c",
+                        "secondary-container": "#bddefe",
+                        "on-primary-container": "#005c4f",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "on-background": "#1d1b1b",
+                        "on-primary-fixed": "#00201b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "80px",
+                        "md": "24px",
+                        "lg": "48px",
+                        "gutter": "20px",
+                        "xs": "4px",
+                        "base": "8px",
+                        "container-max": "1280px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "price-tag": ["Plus Jakarta Sans"],
+                        "body-base": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "price-tag": ["20px", {"lineHeight": "20px", "fontWeight": "700"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <script src="supabase-config.js"></script>
+    <script src="auth.js" defer></script>
+    <script src="admin-app.js" defer></script>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- Top Navigation Anchor -->
+<header class="bg-[#F9FBFB] dark:bg-slate-950 text-[#86D2C1] dark:text-[#A7E3D5] font-['Plus_Jakarta_Sans'] tracking-tight border-b border-[#86D2C1]/10 dark:border-slate-800 shadow-[0_4px_20px_rgba(134,210,193,0.08)] flex justify-between items-center px-6 py-3 w-full sticky top-0 z-50">
+<div class="text-2xl font-extrabold text-[#86D2C1] dark:text-[#A7E3D5]">BeebBeeb</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4">
+<a class="text-[#86D2C1] font-bold border-b-2 border-[#86D2C1]" href="admin.html">Products</a>
+<a class="text-slate-400 dark:text-slate-500 hover:text-[#86D2C1] transition-colors" href="inventory.html">Inventory</a>
+<a class="text-slate-400 dark:text-slate-500 hover:text-[#86D2C1] transition-colors" href="admin-orders.html">Orders</a>
+</div>
+<div class="flex items-center gap-2">
+<button class="hover:bg-[#86D2C1]/5 p-2 rounded-full transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:bg-[#86D2C1]/5 p-2 rounded-full transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<div class="flex">
+<!-- Sidebar Anchor -->
+<aside class="hidden md:flex h-screen w-64 border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-14 left-0 flex-col gap-2 p-4 shadow-sm">
+<div class="mb-4">
+<h2 class="text-xl font-black text-[#86D2C1]">BeebBeeb Admin</h2>
+<p class="text-xs text-slate-500">Soft &amp; Secure Retail</p>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 p-3 bg-[#86D2C1]/10 text-[#86D2C1] rounded-xl font-semibold active:translate-x-1 duration-150" href="admin.html">
+<span class="material-symbols-outlined">styler</span>
+<span>Products</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-slate-500 dark:text-slate-400 hover:text-[#86D2C1] hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors active:translate-x-1 duration-150" href="inventory.html">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Inventory</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-slate-500 dark:text-slate-400 hover:text-[#86D2C1] hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors active:translate-x-1 duration-150" href="admin-orders.html">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>Orders</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-slate-500 dark:text-slate-400 hover:text-[#86D2C1] hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors active:translate-x-1 duration-150" href="admin-sales.html">
+<span class="material-symbols-outlined">bar_chart</span>
+<span>Sales</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-slate-500 dark:text-slate-400 hover:text-[#86D2C1] hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors active:translate-x-1 duration-150" href="admin-support.html">
+<span class="material-symbols-outlined">support_agent</span>
+<span>Support</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-slate-100 pt-4 space-y-1">
+<a class="flex items-center gap-3 p-3 text-slate-500 dark:text-slate-400 hover:text-[#86D2C1] hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors" href="admin-login.html?return=admin.html">
+<span class="material-symbols-outlined">settings</span>
+<span>Admin login</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-slate-500 dark:text-slate-400 hover:text-[#86D2C1] hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors" href="mailto:support@beebbeeb.shop">
+<span class="material-symbols-outlined">help_outline</span>
+<span>Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-6 md:p-lg space-y-md max-w-container-max mx-auto w-full">
+  <div id="bb-admin-products"></div>
+</main>
+</div>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
+<a href="admin.html" class="flex flex-col items-center justify-center bg-[#86D2C1]/20 text-[#86D2C1] rounded-2xl px-5 py-2 font-['Plus_Jakarta_Sans'] text-[10px] uppercase tracking-widest active:scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">styler</span>
+<span class="mt-1">Products</span>
+</a>
+<a href="admin-orders.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 font-['Plus_Jakarta_Sans'] text-[10px] uppercase tracking-widest hover:text-[#86D2C1] active:scale-90 transition-transform">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="mt-1">Orders</span>
+</a>
+<a href="inventory.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 font-['Plus_Jakarta_Sans'] text-[10px] uppercase tracking-widest hover:text-[#86D2C1] active:scale-90 transition-transform">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="mt-1">Stock</span>
+</a>
+<a href="home.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 font-['Plus_Jakarta_Sans'] text-[10px] uppercase tracking-widest hover:text-[#86D2C1] active:scale-90 transition-transform">
+<span class="material-symbols-outlined">storefront</span>
+<span class="mt-1">Site</span>
+</a>
+</nav>
+<!-- FAB (Contextual for Inventory) -->
+<button class="fixed bottom-24 right-6 md:bottom-8 md:right-8 w-14 h-14 bg-primary text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-all md:hidden">
+<span class="material-symbols-outlined">add</span>
+</button>
+</body></html>

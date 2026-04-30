@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+    </style>
+    <script src="supabase-config.js"></script>
+    <script src="auth.js" defer></script>
+    <script src="admin-support-app.js" defer></script>
+    <title>طلبات استرجاع كلمة المرور - الإدارة</title>
+  </head>
+  <body class="bg-[#fff8f7] text-slate-900 min-h-screen">
+    <header class="bg-white/90 border-b border-teal-100 sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="admin.html" class="text-xl font-black text-teal-600">BeebBeeb</a>
+          <span class="text-sm text-slate-500">لوحة الإدارة</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <a
+            href="home.html"
+            class="px-3 py-2 rounded-full text-sm text-slate-600 hover:bg-teal-50"
+            >واجهة الزبون</a
+          >
+          <button
+            data-bb-logout
+            class="px-4 py-2 rounded-full bg-teal-700 text-white font-bold hover:opacity-90"
+          >
+            خروج
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+      <div class="flex items-end justify-between gap-3 mb-4">
+        <div>
+          <h1 class="text-2xl font-black">طلبات إعادة تعيين كلمة المرور</h1>
+          <p class="text-sm text-slate-600">
+            هذه الطلبات تأتي من صفحة الزبون (نسيت كلمة المرور) ليتم التعامل معها يدويًا عبر واتساب.
+          </p>
+        </div>
+        <button
+          id="bb-support-refresh"
+          class="px-4 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 font-bold text-sm"
+          type="button"
+        >
+          تحديث
+        </button>
+      </div>
+
+      <div id="bb-support-msg" class="text-sm text-red-600 mb-3"></div>
+
+      <div class="bg-white rounded-2xl border border-teal-100 shadow-sm overflow-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-teal-50 text-xs text-teal-900">
+            <tr>
+              <th class="px-4 py-3 text-right">الاسم</th>
+              <th class="px-4 py-3 text-right">الهاتف</th>
+              <th class="px-4 py-3 text-right">الحالة</th>
+              <th class="px-4 py-3 text-right">التاريخ</th>
+              <th class="px-4 py-3 text-right">إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="bb-support-rows"></tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>
+

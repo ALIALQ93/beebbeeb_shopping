@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Sales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script defer src="./supabase-config.js"></script>
+    <script defer src="./auth.js"></script>
+    <script defer src="./admin-sales-app.js"></script>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div class="flex min-h-screen">
+      <aside class="w-64 bg-white border-r border-slate-100 p-4">
+        <div class="font-black text-lg mb-4">Admin</div>
+        <nav class="space-y-2 text-sm">
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin.html">Products</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="inventory.html">Inventory</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-orders.html">Orders</a>
+          <a class="block px-3 py-2 rounded-lg bg-slate-900 text-white" href="admin-sales.html">Sales</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-support.html">Support</a>
+        </nav>
+        <div class="mt-6">
+          <button
+            id="bb-logout"
+            class="w-full px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm font-bold"
+          >
+            Logout
+          </button>
+        </div>
+      </aside>
+      <main class="flex-1 p-6">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4">
+          <div>
+            <div class="text-2xl font-black">Sales</div>
+            <div class="text-slate-500 text-sm">Daily totals by order status.</div>
+          </div>
+          <div class="flex flex-wrap items-end gap-3">
+            <div>
+              <div class="text-xs text-slate-500 mb-1">From</div>
+              <input id="bb-sales-from" type="date" class="px-3 py-2 rounded-lg border border-slate-200 bg-white" />
+            </div>
+            <div>
+              <div class="text-xs text-slate-500 mb-1">To</div>
+              <input id="bb-sales-to" type="date" class="px-3 py-2 rounded-lg border border-slate-200 bg-white" />
+            </div>
+            <button
+              id="bb-sales-refresh"
+              class="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-bold hover:opacity-90"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div id="bb-sales-msg" class="text-sm text-red-600 mb-3"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+          <div class="bg-white rounded-xl border border-slate-100 p-4">
+            <div class="text-xs text-slate-500">Completed</div>
+            <div id="bb-sales-total-completed" class="text-xl font-black">—</div>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-100 p-4">
+            <div class="text-xs text-slate-500">Pending</div>
+            <div id="bb-sales-total-pending" class="text-xl font-black">—</div>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-100 p-4">
+            <div class="text-xs text-slate-500">Cancelled</div>
+            <div id="bb-sales-total-cancelled" class="text-xl font-black">—</div>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-100 p-4">
+            <div class="text-xs text-slate-500">All (IQD)</div>
+            <div id="bb-sales-total-all" class="text-xl font-black">—</div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+              <tr>
+                <th class="px-4 py-3">Date</th>
+                <th class="px-4 py-3 text-right">Completed</th>
+                <th class="px-4 py-3 text-right">Pending</th>
+                <th class="px-4 py-3 text-right">Cancelled</th>
+                <th class="px-4 py-3 text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="bb-sales-rows"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+

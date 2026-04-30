@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta_Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed-variant": "#294964",
+                      "on-secondary-fixed": "#001d32",
+                      "on-primary-fixed-variant": "#005045",
+                      "background": "#fff8f7",
+                      "outline": "#6f7976",
+                      "on-surface": "#1d1b1b",
+                      "on-background": "#1d1b1b",
+                      "inverse-on-surface": "#f6efef",
+                      "surface-container-highest": "#e8e1e1",
+                      "surface": "#fff8f7",
+                      "tertiary": "#675f32",
+                      "on-tertiary-fixed": "#201c00",
+                      "tertiary-container": "#d0c58f",
+                      "primary": "#146a5c",
+                      "on-secondary-container": "#43627e",
+                      "on-tertiary-fixed-variant": "#4e471d",
+                      "tertiary-fixed-dim": "#d2c791",
+                      "surface-variant": "#e8e1e1",
+                      "secondary-container": "#bddefe",
+                      "secondary-fixed": "#cde5ff",
+                      "inverse-primary": "#89d5c4",
+                      "on-secondary": "#ffffff",
+                      "primary-fixed": "#a4f1df",
+                      "outline-variant": "#bec9c5",
+                      "on-primary-container": "#005c4f",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#fff8f7",
+                      "tertiary-fixed": "#efe3ab",
+                      "surface-tint": "#146a5c",
+                      "on-tertiary": "#ffffff",
+                      "surface-dim": "#dfd8d8",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#aacaea",
+                      "inverse-surface": "#333030",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed": "#00201b",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#595126",
+                      "surface-container-low": "#f9f2f2",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "primary-fixed-dim": "#89d5c4",
+                      "surface-container-high": "#ede7e6",
+                      "surface-container": "#f3ecec",
+                      "primary-container": "#86d2c1",
+                      "on-surface-variant": "#3f4946",
+                      "secondary": "#42617d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "8px",
+                      "container-max": "1280px",
+                      "lg": "48px",
+                      "gutter": "20px",
+                      "md": "24px",
+                      "xs": "4px",
+                      "sm": "12px",
+                      "xl": "80px"
+              },
+              "fontFamily": {
+                      "body-base": ["Plus Jakarta Sans"],
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "label-caps": ["Plus Jakarta Sans"],
+                      "price-tag": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "price-tag": ["20px", {"lineHeight": "20px", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .puffy-button {
+            box-shadow: 0 4px 14px 0 rgba(20, 106, 92, 0.2);
+            transition: all 0.3s ease;
+        }
+        .puffy-button:active {
+            transform: scale(0.95);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .ambient-card {
+            box-shadow: 0 10px 40px -10px rgba(20, 106, 92, 0.08);
+        }
+    </style>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js" defer></script>
+  <script src="product-app.js" defer></script>
+</head>
+<body class="bg-background font-body-base text-on-background antialiased">
+<!-- TopAppBar -->
+<header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-teal-50/50 shadow-[0_4px_20px_0_rgba(134,210,193,0.1)]">
+<div class="max-w-7xl mx-auto flex justify-between items-center px-4 md:px-8 py-3">
+<div class="flex items-center gap-8">
+<a class="text-2xl font-black text-teal-500 tracking-tight font-display-lg" href="home.html">BeebBeeb Shopping</a>
+<nav class="hidden md:flex gap-6">
+<a class="text-teal-600 font-bold border-b-2 border-teal-400 font-body-base py-1" href="home.html">الرئيسية</a>
+<a class="text-gray-500 hover:bg-teal-50 transition-colors duration-300 px-3 py-1 rounded-lg font-body-base" href="home.html#bb-new-arrivals">المتجر</a>
+<a class="text-gray-500 hover:bg-teal-50 transition-colors duration-300 px-3 py-1 rounded-lg font-body-base" href="home.html#bb-new-arrivals">العروض</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex bg-surface-container-low rounded-full px-4 py-2 items-center gap-2 border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 font-body-base" placeholder="بحث عن منتجات..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-teal-50 rounded-full transition-colors"><span class="material-symbols-outlined text-primary" data-icon="language">language</span></button>
+<button class="p-2 hover:bg-teal-50 rounded-full transition-colors"><span class="material-symbols-outlined text-primary" data-icon="payments">payments</span></button>
+<a href="checkout.html" class="p-2 hover:bg-teal-50 rounded-full transition-colors relative">
+<span class="material-symbols-outlined text-primary" data-icon="shopping_cart">shopping_cart</span>
+<span class="absolute top-1 right-1 bg-error text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">2</span>
+</a>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-4 md:px-8 py-8">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 text-sm text-on-surface-variant mb-8 font-body-base">
+<a class="hover:text-primary" href="home.html">الرئيسية</a>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_left">chevron_left</span>
+<a class="hover:text-primary" href="home.html#bb-new-arrivals">ملابس الأطفال</a>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_left">chevron_left</span>
+<span class="font-semibold text-primary">طقم قطني ناعم "سحاب الصحراء"</span>
+</nav>
+<!-- Product Hero Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<!-- Image Gallery (Asymmetric Layout) -->
+<div class="lg:col-span-7 grid grid-cols-6 gap-4">
+<div class="col-span-6 rounded-[2rem] overflow-hidden bg-white ambient-card border border-primary-container/20">
+<img id="bb-product-image" class="w-full h-[500px] object-cover" data-alt="studio photograph of a soft organic cotton baby outfit in sand color on a neutral background with warm soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfl3g0enYx-YGHJW79NePnNcbraS0DSesSUvbAFNRK6fHcs_Gyz9HASNYYPKvFHXeDE7HoYNa0XoyltIxdZv64vKZr34wORsLds-bWwG7xuvVszUxkqBgO9lhHsRAmiuo2PcC_vN6O00guuzm1zWFVNhfvtiBgun1r-CBOI0I8BiMM6UBMCT0qoXZrTV5Z7ukCNgQWqWm-4i8J5xKEFFu7hlzYcT9Idb5GbIyRNHQ9oMd4GmZ2mLANTiKAQLp0Y-bOaZVs3e3WKiM"/>
+</div>
+<div class="col-span-2 rounded-2xl overflow-hidden bg-white ambient-card border border-primary-container/20 aspect-square">
+<img class="w-full h-full object-cover" data-alt="close up detail of high quality organic cotton fabric weave and wooden buttons on baby clothes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDveeu_zs-An7gqo53Lup8ZoMkVNluO-xsGM5oHpDhrVNaaUM59CEKVShXQkT3jyjtJDT-2IaUsfMOsj7ddjtTv0nMe-Z-A-6YO0w8Qq6luc4LLMtS_ubkU97CUUSF3qsfrmqupeP_6Wp72d0YDzkQX6rJJGzAwB5E5qsfI8r5qc2e8tsUwytJ1Am2vneMsWq3cHkGw0EsYtzcQa77vKmRjqy3UisWU_I6LtSnpvqu_2xdn_p4k1GlPAQuNNDeft98J5qt_Jp_OabI"/>
+</div>
+<div class="col-span-2 rounded-2xl overflow-hidden bg-white ambient-card border border-primary-container/20 aspect-square">
+<img class="w-full h-full object-cover" data-alt="lifestyle shot of baby clothes folded neatly next to a plush elephant toy in a sunlit nursery" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl8sA8jYFmHzt21ASsKaoaYSm44_Ffg5iRbU32j9XPBG7KVUsHLiGSJk5jdE3-CDpRGOOZQVVHQf7ID7gVNJ3hzN0sL1BXWRWWtTpYyAPWF010-HHBvDQOcM3QN4rPNPsbEbHbF5H2suuVP_KeK9gY89lEUw-C0kjfYbVpwR5QOgyoAcKDF7jjUTnS3YdXMuGpBZzIvclOVEd8dK0uVj7Nn8w6hRlFP4QICQj2REghPamYW6IXjVkVFlSiEk-j93iGzCard_XHudI"/>
+</div>
+<div class="col-span-2 rounded-2xl overflow-hidden bg-white ambient-card border border-primary-container/20 aspect-square relative group cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="alternate view of baby outfit set including pants and a small matching hat in soft beige" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7Rmwx_YpCmxjhqXno3vWZTrvXIw6fs3eqmJKliCNXm166d2DLZFdudTYPk2b53NtjJ4kFKS8WEsYUvFF2iXdcjOtTtkw4wTFEIZ2aWsA8O_FPHbFkanE3B6TGzD41bxkKKF2aPPG90njSP2cidtAgmCc5kgir7bGiy9bmtebHyKIH6_vqbym-z18pV2CtnUBwqtqg-IZpSeLHl0nWBEnf5dHmiSeWYxDDaLEL3fPma1pBYkj6_H_in_1fWrhuDFyO6Dost5WUVF4"/>
+<div class="absolute inset-0 bg-primary/20 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="text-white font-bold">+٤ صور</span>
+</div>
+</div>
+</div>
+<!-- Product Details -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<div>
+<span class="inline-block px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold font-label-caps mb-3">وصل حديثاً</span>
+<h1 id="bb-product-title" class="font-display-lg text-display-lg text-on-surface mb-2">طقم قطني ناعم "سحاب الصحراء"</h1>
+<p id="bb-product-title-en" class="text-sm text-on-surface-variant" dir="ltr"></p>
+<div class="flex items-center gap-4">
+<span id="bb-product-price" class="font-price-tag text-price-tag text-primary">٤٥,٠٠٠ د.ع</span>
+<span class="text-on-surface-variant line-through text-sm">٦٠,٠٠٠ د.ع</span>
+<div class="flex items-center bg-tertiary-fixed text-on-tertiary-container px-2 py-0.5 rounded text-xs font-bold">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>٤.٩ (١٢٨ تقييم)</span>
+</div>
+</div>
+</div>
+<div class="h-px bg-outline-variant/30 w-full"></div>
+<!-- Size Selection -->
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<span class="font-headline-md text-sm text-on-surface">اختر المقاس</span>
+<button class="text-primary text-xs font-bold underline">دليل المقاسات</button>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-full border-2 border-primary bg-primary text-white font-bold text-sm transition-all">٠-٣ أشهر</button>
+<button class="px-4 py-2 rounded-full border-2 border-outline-variant hover:border-primary-container text-on-surface-variant font-bold text-sm transition-all">٣-٦ أشهر</button>
+<button class="px-4 py-2 rounded-full border-2 border-outline-variant hover:border-primary-container text-on-surface-variant font-bold text-sm transition-all">٦-١٢ شهر</button>
+<button class="px-4 py-2 rounded-full border-2 border-outline-variant hover:border-primary-container text-on-surface-variant font-bold text-sm transition-all">١٢-١٨ شهر</button>
+<button class="px-4 py-2 rounded-full border-2 border-outline-variant opacity-50 cursor-not-allowed text-on-surface-variant font-bold text-sm transition-all">٢٤ شهر</button>
+</div>
+</div>
+<!-- Color selector (dynamic) -->
+<div class="flex flex-col gap-2 mt-4">
+  <div class="flex justify-between items-center">
+    <span class="font-headline-md text-sm text-on-surface">اختر اللون</span>
+    <span id="bb-color-selected" class="text-xs text-on-surface-variant"></span>
+  </div>
+  <div id="bb-color-options" class="flex flex-wrap gap-2"></div>
+  <div id="bb-color-msg" class="text-xs text-error"></div>
+</div>
+<!-- Fabric & Details -->
+<div class="bg-surface-container-low p-6 rounded-[1.5rem] border border-primary-container/10 flex flex-col gap-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="maternity">pregnancy</span>
+<div>
+<span class="block font-bold text-sm text-on-surface">خامة طبيعية ١٠٠٪</span>
+<p id="bb-product-desc" class="text-xs text-on-surface-variant leading-relaxed">مصنوع من قطن البيما العضوي فائق النعومة، مضاد للحساسية ومثالي لبشرة طفلك الرقيقة.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="eco">eco</span>
+<div>
+<span class="block font-bold text-sm text-on-surface">صديق للبيئة</span>
+<p class="text-xs text-on-surface-variant leading-relaxed">أصباغ نباتية آمنة خالية من المواد الكيميائية الضارة.</p>
+</div>
+</div>
+</div>
+<!-- CTA Buttons -->
+<div class="flex flex-col gap-3 mt-4">
+<button id="bb-product-add" class="puffy-button w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all">
+<span class="material-symbols-outlined" data-icon="shopping_bag" style="font-variation-settings: 'FILL' 1;">shopping_bag</span>
+                        إضافة إلى السلة
+                    </button>
+<button class="w-full border-2 border-primary-container text-primary py-4 rounded-xl font-bold hover:bg-primary-container/10 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+                        إضافة للمفضلة
+                    </button>
+</div>
+<!-- Shipping Info -->
+<div class="flex items-center justify-between text-xs text-on-surface-variant font-body-base border-t border-outline-variant/20 pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="local_shipping">local_shipping</span>
+                        توصيل مجاني للطلبات فوق ٧٥,٠٠٠ د.ع
+                    </div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+                        إرجاع سهل خلال ١٤ يوم
+                    </div>
+</div>
+</div>
+</div>
+<!-- Related Products Section -->
+<section class="mt-24">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="font-display-lg text-headline-md text-on-surface mb-1">قد يعجبك أيضاً</h2>
+<p class="text-on-surface-variant text-sm">مجموعات مختارة بعناية لتناسب ذوقك</p>
+</div>
+<button class="text-primary font-bold flex items-center gap-1 hover:translate-x-1 transition-transform">
+                    عرض الكل
+                    <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Related Card 1 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-3xl overflow-hidden aspect-[4/5] mb-4 ambient-card bg-white">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="lifestyle photo of a toddler playing in a cream colored knit sweater with a minimalist aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6OVRFG0i56FvXrIQ3HvCqj5Oiu6R3_ILQKK4ZQzEtLpcV7OxNZ1fBwWsc72zzWaINC62ZrUovucg8O0qgjVZdB1FM0oBPT4w2GT7BeJcmrAddBz9QlS9trRv-ugrdvANiVtFgnaevip0eXHjeGMLA5l954pZA0AAq40C7TfG6DLpaRPOC_HIxWntZBRD3kVFWHsGZF1EzzcixniUmdp6LL4xyTyniJ83Pyvdhr_g69g6-mW-79MG3JFWKwqwyEwFCFL9MopwBeZI"/>
+<button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-primary hover:bg-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm" data-icon="favorite">favorite</span>
+</button>
+</div>
+<h3 class="font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">كنزة صوفية "غيمة بيضاء"</h3>
+<p class="text-primary font-price-tag text-sm">٣٢,٠٠٠ د.ع</p>
+</div>
+<!-- Related Card 2 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-3xl overflow-hidden aspect-[4/5] mb-4 ambient-card bg-white">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="set of light gray baby clothes with a small bib and matching booties on a wood surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7MoXMB_7uCf_UKF5R6IYc0jy_BRnNaF2x7Brm5YzohDRbDZh9c0Lq8SQWtPtqFRA8kHE98FZRXz__kCLgdPzBFBLX_7boN_-iG1Wdk0PpY5NciTGOb7wrAq4UQXAdoeGfkOqmYOEJ4So997eNcpRxGXmE9z7mh86sj7fUvs6KG_wZs24y37iUbc4RWMSCTVjCrhj7GO22YkEBD6HkXys1Dn9eNAkkgtPdJ-5mCBJQr7i6b_-STSED95FVN7vWciCKUVR0XsfF7SE"/>
+<button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-primary hover:bg-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm" data-icon="favorite">favorite</span>
+</button>
+<span class="absolute top-4 left-4 bg-error text-white text-[10px] px-2 py-1 rounded-full font-bold">خصم ٢٠٪</span>
+</div>
+<h3 class="font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">طقم النوم الرمادي الفاخر</h3>
+<p class="text-primary font-price-tag text-sm">٣٨,٠٠٠ د.ع</p>
+</div>
+<!-- Related Card 3 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-3xl overflow-hidden aspect-[4/5] mb-4 ambient-card bg-white">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="overhead view of pastel yellow baby onesie and matching headbands with floral pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvkPnph2HytJQZuYEaOwA7ly9K1mMhaYsHhQIsA-VFKK30N5WOj_B32G8f7-wboQ1ukkbI2a3Jx6f-XBmP5774sX_XLOGnrUYYnt6Ra-FGRPqjtBMxGvz8irqiwFMp0kSzJuA4hrnqirDI2cgiuSbrqeYnxZhcwJRaMJ3p2TcoCJLE-vTyr9mJBfeVJ5BQSX2oq5kKuYbwJ6Lou9hNEzHhk4cEqWf7tjnPMpu9UbVoLmq0RS2-LajRZB_KXfvuYbvt5SGjsQONQeo"/>
+<button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-primary hover:bg-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm" data-icon="favorite">favorite</span>
+</button>
+</div>
+<h3 class="font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">أوفرهول "شمس الصباح"</h3>
+<p class="text-primary font-price-tag text-sm">٢٧,٠٠٠ د.ع</p>
+</div>
+<!-- Related Card 4 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-3xl overflow-hidden aspect-[4/5] mb-4 ambient-card bg-white">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="a tiny pair of brown leather baby moccasins next to a soft linen baby blanket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAOJmivojrnyTOp5v7C2UF3O8Bym8FI7NIvKb3Lm2UdB_YJK_7XepBZ_NbqIgnGg2axT4sYHYGPeikEwkbVHGjcKeWpv1mvWNgvKgqpZ_SWLtt7tQ6BDberVzvQpixJ3KLtUaGKK7N6Kkzfzs3qZcgCNcQKp5gaSz1HLBblcnp86pPjijAha-dq67eAA0-hojW1Xgjg_NlPcpctPMybEll1A-JFpnPd0GrsIfQOdZVYQGvso161TIc1CtNGcGz2QlRgmZMemcCOL4"/>
+<button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-primary hover:bg-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm" data-icon="favorite">favorite</span>
+</button>
+</div>
+<h3 class="font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">حذاء جلد طبيعي ناعم</h3>
+<p class="text-primary font-price-tag text-sm">١٩,٥٠٠ د.ع</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#FDFCFB] border-t border-teal-100 w-full rounded-t-[2rem] mt-24">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 px-6 py-12">
+<div class="flex flex-col gap-4">
+<a class="text-xl font-bold text-teal-600 font-display-lg" href="home.html">BeebBeeb Shopping</a>
+<p class="text-gray-600 text-sm font-body-base leading-relaxed">نحن نهتم بأناقة وراحة طفلك من خلال تقديم أفضل الخامات العالمية المختارة بعناية وحب.</p>
+<div class="flex gap-3">
+<a class="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 hover:bg-teal-500 hover:text-white transition-all" href="home.html"><span class="material-symbols-outlined text-sm" data-icon="share">share</span></a>
+<a class="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 hover:bg-teal-500 hover:text-white transition-all" href="mailto:info@beebbeeb.shop"><span class="material-symbols-outlined text-sm" data-icon="alternate_email">alternate_email</span></a>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-4">روابط سريعة</h4>
+<ul class="flex flex-col gap-2">
+<li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="checkout.html">الشحن والإرجاع</a></li>
+<li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="tracking.html">تتبع طلبك</a></li>
+<li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="login.html">تسجيل الدخول</a></li>
+<li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="login.html">الدخول</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-4">حسابي</h4>
+<ul class="flex flex-col gap-2">
+<li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="login.html">الملف الشخصي</a></li>
+<li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="my-orders.html">طلباتي</a></li>
+<li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="login.html">قائمة الأمنيات</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-4">النشرة البريدية</h4>
+<p class="text-gray-600 text-xs mb-3">اشترك للحصول على أحدث العروض والمنتجات</p>
+<div class="flex gap-2">
+<input class="bg-white border-teal-100 rounded-lg text-sm px-3 flex-grow focus:border-teal-500 focus:ring-0" placeholder="البريد الإلكتروني" type="email"/>
+<button class="bg-teal-500 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-teal-600 transition-all">اشترك</button>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-6 py-6 border-t border-teal-50 text-center text-gray-500 text-xs font-body-base">
+            © 2024 BeebBeeb Shopping. All rights reserved.
+        </div>
+</footer>
+</body></html>

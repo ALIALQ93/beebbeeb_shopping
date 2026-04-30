@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed-variant": "#294964",
+                    "on-secondary-fixed": "#001d32",
+                    "on-primary-fixed-variant": "#005045",
+                    "background": "#fff8f7",
+                    "outline": "#6f7976",
+                    "on-surface": "#1d1b1b",
+                    "on-background": "#1d1b1b",
+                    "inverse-on-surface": "#f6efef",
+                    "surface-container-highest": "#e8e1e1",
+                    "surface": "#fff8f7",
+                    "tertiary": "#675f32",
+                    "on-tertiary-fixed": "#201c00",
+                    "tertiary-container": "#d0c58f",
+                    "primary": "#146a5c",
+                    "on-secondary-container": "#43627e",
+                    "on-tertiary-fixed-variant": "#4e471d",
+                    "tertiary-fixed-dim": "#d2c791",
+                    "surface-variant": "#e8e1e1",
+                    "secondary-container": "#bddefe",
+                    "secondary-fixed": "#cde5ff",
+                    "inverse-primary": "#89d5c4",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed": "#a4f1df",
+                    "outline-variant": "#bec9c5",
+                    "on-primary-container": "#005c4f",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#fff8f7",
+                    "tertiary-fixed": "#efe3ab",
+                    "surface-tint": "#146a5c",
+                    "on-tertiary": "#ffffff",
+                    "surface-dim": "#dfd8d8",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#aacaea",
+                    "inverse-surface": "#333030",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed": "#00201b",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-container": "#595126",
+                    "surface-container-low": "#f9f2f2",
+                    "on-error": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#89d5c4",
+                    "surface-container-high": "#ede7e6",
+                    "surface-container": "#f3ecec",
+                    "primary-container": "#86d2c1",
+                    "on-surface-variant": "#3f4946",
+                    "secondary": "#42617d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "container-max": "1280px",
+                    "lg": "48px",
+                    "gutter": "20px",
+                    "md": "24px",
+                    "xs": "4px",
+                    "sm": "12px",
+                    "xl": "80px"
+            },
+            "fontFamily": {
+                    "body-base": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["Plus Jakarta Sans"],
+                    "price-tag": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "price-tag": ["20px", {"lineHeight": "20px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .soft-puffy-button {
+            box-shadow: 0 4px 14px 0 rgba(20, 106, 92, 0.2);
+        }
+        .soft-glow-card {
+            box-shadow: 0 10px 30px -10px rgba(134, 210, 193, 0.15);
+        }
+    </style>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js" defer></script>
+  <script src="checkout-app.js" defer></script>
+</head>
+<body class="bg-background font-body-base text-on-background min-h-screen">
+<!-- TopAppBar -->
+<nav class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-teal-50/50 shadow-[0_4px_20px_0_rgba(134,210,193,0.1)]">
+<div class="flex justify-between items-center px-4 md:px-8 py-3 max-w-7xl mx-auto">
+<div class="flex items-center gap-8">
+<a class="text-2xl font-black text-teal-500 tracking-tight font-['Plus_Jakarta_Sans']" href="home.html">BeebBeeb Shopping</a>
+<div class="hidden md:flex gap-6">
+<a class="text-teal-600 font-bold border-b-2 border-teal-400 font-body-base text-body-base" href="checkout.html">سلة التسوق</a>
+<a class="text-gray-500 hover:bg-teal-50 transition-colors duration-300 px-3 py-1 rounded-lg font-body-base text-body-base" href="home.html#bb-new-arrivals">المتجر</a>
+<a class="text-gray-500 hover:bg-teal-50 transition-colors duration-300 px-3 py-1 rounded-lg font-body-base text-body-base" href="home.html#bb-new-arrivals">العروض</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-surface-container-low rounded-full px-4 py-2 border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline text-lg">language</span>
+<select class="bg-transparent border-none focus:ring-0 text-sm font-semibold mr-2">
+<option>العربية (العراق)</option>
+<option>English (US)</option>
+</select>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-outline hover:bg-teal-50 rounded-full transition-all">
+<span class="material-symbols-outlined">payments</span>
+</button>
+<button class="p-2 text-primary hover:bg-teal-50 rounded-full transition-all relative">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="absolute top-0 right-0 bg-error text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">3</span>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto px-4 md:px-8 py-8 lg:py-12">
+<!-- Progress Indicator -->
+<div class="flex items-center justify-center mb-12 gap-4">
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">1</div>
+<span class="text-sm font-semibold text-primary">السلة</span>
+</div>
+<div class="h-1 w-16 bg-primary-container rounded-full mb-6"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold">2</div>
+<span class="text-sm font-semibold text-on-surface-variant">الشحن</span>
+</div>
+<div class="h-1 w-16 bg-surface-container-highest rounded-full mb-6"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-outline flex items-center justify-center font-bold">3</div>
+<span class="text-sm font-semibold text-outline">الدفع</span>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Cart & Forms -->
+<div class="lg:col-span-8 space-y-8">
+<!-- Cart Items Section -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 soft-glow-card border border-teal-50">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-6">محتويات السلة (3)</h2>
+<div class="divide-y divide-teal-50">
+<!-- Item 1 -->
+<div class="py-6 flex flex-col md:flex-row gap-6">
+<div class="w-24 h-24 rounded-2xl overflow-hidden bg-surface-variant flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Soft organic cotton baby onesie in pastel mint green laid flat on a clean white surface with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmaaVXjO1sGGhmLpU34CcPRE11KcS-lQ3ZTxEcnF8Kt5C63vjeip9VQ07HYS7oTeoP2-BPH1ZFjopnDtmW2FgZiAByKOb-fecNt_M639WtorKKtQiwUSuUQJ2umIaeNkuFudtdvIPuhzrdaQmt1XRl2PyHQVl3Yi_9y_b_sB0_0p3YbCVawDB5HjNVv4h_uYGxb1QtlE0VJAvU63N33YygVfR1XQA6TKFYzALQe6y5TubzWNl392VDgJA132BTRNltGT9OybLE6-I"/>
+</div>
+<div class="flex-grow space-y-1">
+<div class="flex justify-between">
+<h3 class="text-body-base font-bold text-on-surface">بدلة قطنية عضوية - أخضر فاتح</h3>
+<button class="text-outline hover:text-error transition-colors"><span class="material-symbols-outlined">delete</span></button>
+</div>
+<p class="text-sm text-outline">المقاس: 0-3 أشهر</p>
+<div class="flex justify-between items-end mt-4">
+<div class="flex items-center border border-outline-variant/30 rounded-xl px-2 py-1 bg-surface-container-low">
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">-</button>
+<span class="px-4 font-bold">1</span>
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">+</button>
+</div>
+<div class="text-left">
+<span class="text-price-tag font-price-tag text-primary">25,000 IQD</span>
+<p class="text-xs text-outline">$19.00</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="py-6 flex flex-col md:flex-row gap-6">
+<div class="w-24 h-24 rounded-2xl overflow-hidden bg-surface-variant flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Plush handmade teddy bear toy with soft beige fur and a silk ribbon on a nursery shelf with soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBN8NBOmTsgpA-Q4j3Bhab67D3XpwPi-OSQOeg6p5DoaO8G4AHssGHgl7zuM1v6gaeceBBlN9b-oCjXtvDyaP8Tb-ya8wJ0m5twvZ8t6T7mIB_EGOwwfraKbpVuyF9m90e3s6ljEk0ZwcvxDkZjnfrAhO5cT8O0zB54m9uEWlIIwCQGamIRBiiWRfljwptDOrf-EvYFZ6jGkX8FpCVav0LzppH8mEWEwEcYz-uHiHpGZbWtneNY67z5vmP5JdPNyBhPmMMg0PqmrL0"/>
+</div>
+<div class="flex-grow space-y-1">
+<div class="flex justify-between">
+<h3 class="text-body-base font-bold text-on-surface">دب قطيفة ناعم "صديق الطفل"</h3>
+<button class="text-outline hover:text-error transition-colors"><span class="material-symbols-outlined">delete</span></button>
+</div>
+<p class="text-sm text-outline">اللون: بيج كريمي</p>
+<div class="flex justify-between items-end mt-4">
+<div class="flex items-center border border-outline-variant/30 rounded-xl px-2 py-1 bg-surface-container-low">
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">-</button>
+<span class="px-4 font-bold">1</span>
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">+</button>
+</div>
+<div class="text-left">
+<span class="text-price-tag font-price-tag text-primary">35,000 IQD</span>
+<p class="text-xs text-outline">$26.50</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Shipping Information -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 soft-glow-card border border-teal-50">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">local_shipping</span>
+                        معلومات الشحن
+                    </h2>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-sm font-bold text-outline-variant">الاسم الكامل</label>
+<input id="bb-shipping-name" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary transition-all" placeholder="مثال: أحمد علي" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-outline-variant">رقم الهاتف</label>
+<input id="bb-shipping-phone" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary transition-all text-left" dir="ltr" placeholder="07XXXXXXXXX" type="tel"/>
+</div>
+<div class="space-y-2 md:col-span-2">
+<label class="text-sm font-bold text-outline-variant">المدينة</label>
+<select id="bb-shipping-city" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary transition-all appearance-none">
+<option>بغداد</option>
+<option>أربيل</option>
+<option>البصرة</option>
+<option>الموصل</option>
+</select>
+</div>
+<div class="space-y-2 md:col-span-2">
+<label class="text-sm font-bold text-outline-variant">العنوان بالتفصيل</label>
+<textarea id="bb-shipping-address" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary transition-all" placeholder="اسم المنطقة، رقم الزقاق، معلم قريب..." rows="3"></textarea>
+</div>
+</form>
+</section>
+<!-- Payment Method -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 soft-glow-card border border-teal-50">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+                        طريقة الدفع
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<label class="relative border-2 border-primary bg-primary-container/10 rounded-2xl p-4 cursor-pointer flex flex-col items-center gap-2 text-center group">
+<input checked="" class="hidden" name="payment" type="radio"/>
+<span class="material-symbols-outlined text-3xl text-primary" data-weight="fill">payments</span>
+<span class="font-bold text-primary">الدفع عند الاستلام</span>
+</label>
+<label class="relative border-2 border-outline-variant/30 rounded-2xl p-4 cursor-pointer flex flex-col items-center gap-2 text-center hover:border-primary/50 transition-all group">
+<input class="hidden" name="payment" type="radio"/>
+<span class="material-symbols-outlined text-3xl text-outline group-hover:text-primary">credit_card</span>
+<span class="font-bold text-on-surface-variant group-hover:text-primary">زين كاش</span>
+</label>
+<label class="relative border-2 border-outline-variant/30 rounded-2xl p-4 cursor-pointer flex flex-col items-center gap-2 text-center hover:border-primary/50 transition-all group">
+<input class="hidden" name="payment" type="radio"/>
+<span class="material-symbols-outlined text-3xl text-outline group-hover:text-primary">account_balance</span>
+<span class="font-bold text-on-surface-variant group-hover:text-primary">بطاقة ائتمان</span>
+</label>
+</div>
+</section>
+</div>
+<!-- Right Column: Summary -->
+<div class="lg:col-span-4">
+<div class="bg-white rounded-3xl p-6 soft-glow-card border border-teal-100 sticky top-24">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-6">ملخص الطلب</h2>
+<div class="flex items-center justify-between mb-8 p-1 bg-surface-container rounded-xl">
+<button class="flex-1 py-2 rounded-lg bg-primary text-white font-bold transition-all">IQD</button>
+<button class="flex-1 py-2 rounded-lg text-outline font-bold hover:bg-surface-container-highest transition-all">USD</button>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between text-on-surface-variant">
+<span>المجموع الفرعي</span>
+<span class="font-bold">60,000 IQD</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>تكلفة الشحن</span>
+<span class="font-bold">5,000 IQD</span>
+</div>
+<div class="flex justify-between text-primary font-bold">
+<span>خصم (كود: WELCOME)</span>
+<span>-5,000 IQD</span>
+</div>
+<div class="pt-4 border-t border-teal-50 flex justify-between items-end">
+<div class="space-y-1">
+<span class="text-lg font-bold text-on-surface">الإجمالي</span>
+<p class="text-xs text-outline">شامل الضريبة</p>
+</div>
+<div class="text-left">
+<span class="text-3xl font-black text-primary">60,000 IQD</span>
+<p class="text-sm text-outline">~$45.50</p>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex gap-2">
+<input class="flex-grow bg-surface-container-low border-none rounded-xl px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="كود الخصم" type="text"/>
+<button class="px-4 py-2 bg-secondary-container text-on-secondary-container rounded-xl font-bold hover:bg-secondary-fixed transition-colors">تطبيق</button>
+</div>
+<button id="bb-place-order" class="w-full bg-primary text-white py-4 rounded-2xl font-bold text-lg soft-puffy-button hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
+<span>إتمام الطلب الآن</span>
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div id="bb-checkout-msg" class="text-sm text-error mt-3"></div>
+</div>
+<div class="mt-8 pt-8 border-t border-teal-50">
+<div class="flex items-center gap-3 text-sm text-outline bg-teal-50/50 p-4 rounded-2xl">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<p>نضمن لك عملية دفع آمنة 100% وحماية لبياناتك الشخصية.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full rounded-t-[2rem] mt-12 bg-[#FDFCFB] border-t border-teal-100">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 px-6 py-12 max-w-7xl mx-auto font-['Plus_Jakarta_Sans'] text-sm">
+<div class="space-y-4">
+<span class="text-xl font-bold text-teal-600">BeebBeeb Shopping</span>
+<p class="text-gray-600 leading-relaxed">نهتم بكل تفصيلة في حياة طفلك، لنقدم لك أفضل المنتجات العضوية والآمنة بجودة استثنائية.</p>
+</div>
+<div class="space-y-4">
+<h4 class="font-bold text-teal-500">سياساتنا</h4>
+<ul class="space-y-2">
+<li><a class="text-gray-600 hover:text-teal-400 underline decoration-2 transition-all" href="home.html">الرئيسية</a></li>
+<li><a class="text-gray-600 hover:text-teal-400 underline decoration-2 transition-all" href="tracking.html">تتبع طلبك</a></li>
+<li><a class="text-gray-600 hover:text-teal-400 underline decoration-2 transition-all" href="my-orders.html">طلباتي</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<h4 class="font-bold text-teal-500">المساعدة</h4>
+<ul class="space-y-2">
+<li><a class="text-gray-600 hover:text-teal-400 underline decoration-2 transition-all" href="login.html">تسجيل الدخول</a></li>
+<li><a class="text-gray-600 hover:text-teal-400 underline decoration-2 transition-all" href="login.html">الدخول</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<h4 class="font-bold text-teal-500">تابعونا</h4>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 hover:bg-teal-100 transition-colors" href="home.html">
+<span class="material-symbols-outlined">public</span>
+</a>
+<a class="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 hover:bg-teal-100 transition-colors" href="mailto:info@beebbeeb.shop">
+<span class="material-symbols-outlined">alternate_email</span>
+</a>
+</div>
+<p class="text-gray-600 text-xs mt-4">© 2024 BeebBeeb Shopping. جميع الحقوق محفوظة.</p>
+</div>
+</div>
+</footer>
+</body></html>
