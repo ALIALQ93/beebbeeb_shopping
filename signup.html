@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>إنشاء حساب - BeebBeeb</title>
+    <script src="supabase-config.js"></script>
+    <script src="auth.js" defer></script>
+    <style>
+      body{font-family:system-ui,Segoe UI,Arial;background:#fff8f7;max-width:520px;margin:60px auto;padding:0 16px;color:#1d1b1b}
+      .card{background:#fff;border:1px solid #e8e1e1;border-radius:18px;padding:18px}
+      label{display:block;margin:10px 0 6px;font-weight:700}
+      input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #bec9c5;background:#fff}
+      button{margin-top:14px;width:100%;padding:12px 14px;border-radius:12px;border:0;background:#146a5c;color:#fff;font-weight:800;cursor:pointer}
+      button:hover{opacity:.92}
+      .secondary{background:#42617d}
+      a{color:#146a5c}
+      .note{margin:12px 0 0;font-size:12px;color:#3f4946}
+      .msg{margin-top:10px;font-size:13px;color:#ba1a1a;min-height:18px}
+    </style>
+  </head>
+  <body>
+    <h2>إنشاء حساب</h2>
+    <p>التسجيل يكون برقم الهاتف وكلمة مرور (بدون SMS).</p>
+    <div class="card">
+      <form id="signupForm">
+        <label for="full_name">الاسم</label>
+        <input id="full_name" name="full_name" type="text" placeholder="مثال: أحمد علي" required />
+        <label for="phone">الهاتف</label>
+        <input id="phone" name="phone" type="tel" placeholder="07XXXXXXXXX" dir="ltr" required />
+        <label for="password">كلمة المرور</label>
+        <input id="password" name="password" type="password" placeholder="••••••••" required dir="ltr" />
+        <button type="submit">إنشاء الحساب</button>
+        <button type="button" id="goLogin" class="secondary">لدي حساب (تسجيل دخول)</button>
+        <div id="signupMsg" class="msg"></div>
+      </form>
+      <p class="note">سيتم منع تكرار رقم الهاتف.</p>
+    </div>
+    <p style="margin-top:16px"><a href="home.html">رجوع للرئيسية</a></p>
+  </body>
+</html>
+

@@ -41,7 +41,67 @@
 
     var fromEl = $("bb-sales-from");
     var toEl = $("bb-sales-to");
-    var rowsEl = $("bb-sales-rows");
+    var rowsPending = $("bb-sales-rows-pending");
+    var rowsConfirmed = $("bb-sales-rows-confirmed");
+    var rowsDelivering = $("bb-sales-rows-delivering");
+    var rowsCompleted = $("bb-sales-rows-completed");
+    var rowsCancelled = $("bb-sales-rows-cancelled");
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return (
+          {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          }[c] || c
+        );
+      });
+    }
+
+    function normStatus(s) {
+      var st0 = String(s || "pending").toLowerCase();
+      if (st0 === "done") return "completed";
+      if (st0 === "canceled") return "cancelled";
+      return st0 || "pending";
+    }
+
+    function renderTable(rowsEl, countElId, list) {
+      if (!rowsEl) return;
+      var countEl = $(countElId);
+      if (countEl) countEl.textContent = (list || []).length ? (list.length + " orders") : "0";
+      if (!list || !list.length) {
+        rowsEl.innerHTML =
+          '<tr><td class="px-4 py-6 text-center text-slate-500" colspan="5">No orders.</td></tr>';
+        return;
+      }
+      rowsEl.innerHTML = list
+        .map(function (o) {
+          var when = o.created_at ? new Date(o.created_at).toLocaleString() : "—";
+          return (
+            '<tr class="border-b border-slate-100">' +
+            '<td class="px-4 py-3 font-mono text-xs">' +
+            escapeHtml(String(o.id || "").slice(0, 8)) +
+            "…</td>" +
+            '<td class="px-4 py-3">' +
+            escapeHtml(o.shipping_name || "") +
+            "</td>" +
+            '<td class="px-4 py-3">' +
+            escapeHtml(o.shipping_city || "") +
+            "</td>" +
+            '<td class="px-4 py-3 text-right font-semibold">' +
+            fmtIQD(o.total) +
+            "</td>" +
+            '<td class="px-4 py-3 text-xs text-slate-500">' +
+            escapeHtml(when) +
+            "</td>" +
+            "</tr>"
+          );
+        })
+        .join("");
+    }
 
     // defaults: last 30 days
     var today = new Date();
@@ -52,7 +112,7 @@
 
     async function load() {
       setMsg("");
-      if (!rowsEl) return;
+      if (!rowsPending || !rowsConfirmed || !rowsDelivering || !rowsCompleted || !rowsCancelled) return;
 
       var fromVal = fromEl && fromEl.value ? fromEl.value : "";
       var toVal = toEl && toEl.value ? toEl.value : "";
@@ -64,7 +124,7 @@
       // Query by created_at if available; otherwise fall back to id ordering (less accurate).
       var q = sb
         .from("orders")
-        .select("id,status,total,created_at")
+        .select("id,status,total,created_at,shipping_name,shipping_city")
         .gte("created_at", fromVal + "T00:00:00Z")
         .lte("created_at", toVal + "T23:59:59Z")
         .order("created_at", { ascending: true })
@@ -73,7 +133,11 @@
       var res = await q;
       if (res.error) {
         // fallback: try without created_at filters
-        res = await sb.from("orders").select("id,status,total,created_at").order("id", { ascending: true }).limit(2000);
+        res = await sb
+          .from("orders")
+          .select("id,status,total,created_at,shipping_name,shipping_city")
+          .order("id", { ascending: true })
+          .limit(2000);
       }
       if (res.error) {
         setMsg(res.error.message);
@@ -81,25 +145,29 @@
       }
 
       var data = res.data || [];
-      var byDay = {}; // ymd -> {completed,pending,cancelled,total}
+      var buckets = {
+        pending: [],
+        confirmed: [],
+        delivering: [],
+        completed: [],
+        cancelled: [],
+      };
       var totals = { completed: 0, pending: 0, cancelled: 0, all: 0 };
 
       data.forEach(function (o) {
-        var day = o.created_at ? ymdFromTs(o.created_at) : "unknown";
-        byDay[day] = byDay[day] || { completed: 0, pending: 0, cancelled: 0, total: 0 };
         var t = Number(o.total || 0);
-        var st = String(o.status || "pending").toLowerCase();
-        if (st === "completed" || st === "done") {
-          byDay[day].completed += t;
+        var st = normStatus(o.status);
+        if (!buckets[st]) st = "pending";
+        buckets[st].push(o);
+
+        if (st === "completed") {
           totals.completed += t;
-        } else if (st === "cancelled" || st === "canceled") {
-          byDay[day].cancelled += t;
+        } else if (st === "cancelled") {
           totals.cancelled += t;
         } else {
-          byDay[day].pending += t;
+          // treat pending+confirmed+delivering as "pending" total card
           totals.pending += t;
         }
-        byDay[day].total += t;
         totals.all += t;
       });
 
@@ -108,37 +176,18 @@
       $("bb-sales-total-cancelled").textContent = fmtIQD(totals.cancelled);
       $("bb-sales-total-all").textContent = fmtIQD(totals.all);
 
-      var days = Object.keys(byDay).sort();
-      if (!days.length) {
-        rowsEl.innerHTML =
-          '<tr><td class="px-4 py-8 text-center text-slate-500" colspan="5">No data.</td></tr>';
-        return;
-      }
+      // newest first in each table
+      Object.keys(buckets).forEach(function (k) {
+        buckets[k].sort(function (a, b) {
+          return String(b.created_at || "").localeCompare(String(a.created_at || ""));
+        });
+      });
 
-      rowsEl.innerHTML = days
-        .map(function (d) {
-          var r = byDay[d];
-          return (
-            "<tr class=\"border-b border-slate-100\">" +
-            '<td class="px-4 py-3 font-mono text-xs">' +
-            d +
-            "</td>" +
-            '<td class="px-4 py-3 text-right font-semibold">' +
-            fmtIQD(r.completed) +
-            "</td>" +
-            '<td class="px-4 py-3 text-right font-semibold">' +
-            fmtIQD(r.pending) +
-            "</td>" +
-            '<td class="px-4 py-3 text-right font-semibold">' +
-            fmtIQD(r.cancelled) +
-            "</td>" +
-            '<td class="px-4 py-3 text-right font-black">' +
-            fmtIQD(r.total) +
-            "</td>" +
-            "</tr>"
-          );
-        })
-        .join("");
+      renderTable(rowsPending, "bb-sales-count-pending", buckets.pending);
+      renderTable(rowsConfirmed, "bb-sales-count-confirmed", buckets.confirmed);
+      renderTable(rowsDelivering, "bb-sales-count-delivering", buckets.delivering);
+      renderTable(rowsCompleted, "bb-sales-count-completed", buckets.completed);
+      renderTable(rowsCancelled, "bb-sales-count-cancelled", buckets.cancelled);
     }
 
     var refresh = $("bb-sales-refresh");

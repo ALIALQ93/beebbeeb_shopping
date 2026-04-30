@@ -4,10 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Google Fonts removed to avoid MIME errors on restricted networks -->
     <style>
       body {
         font-family: "Plus Jakarta Sans", sans-serif;
@@ -41,40 +38,87 @@
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-8">
-      <div class="flex items-end justify-between gap-3 mb-4">
-        <div>
-          <h1 class="text-2xl font-black">طلبات إعادة تعيين كلمة المرور</h1>
-          <p class="text-sm text-slate-600">
-            هذه الطلبات تأتي من صفحة الزبون (نسيت كلمة المرور) ليتم التعامل معها يدويًا عبر واتساب.
-          </p>
+    <div class="flex">
+      <aside class="hidden md:flex h-[calc(100vh-56px)] w-64 border-r border-teal-100 bg-white sticky top-14 flex-col gap-2 p-4">
+        <div class="mb-3">
+          <h2 class="text-lg font-black text-teal-700">BeebBeeb Admin</h2>
+          <p class="text-xs text-slate-500">Tools & support</p>
         </div>
-        <button
-          id="bb-support-refresh"
-          class="px-4 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 font-bold text-sm"
-          type="button"
-        >
-          تحديث
-        </button>
-      </div>
+        <nav class="space-y-1 text-sm">
+          <a class="flex items-center gap-3 p-3 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors" href="admin.html">
+            <span class="material-symbols-outlined">styler</span>
+            <span>Products</span>
+          </a>
+          <a class="flex items-center gap-3 p-3 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors" href="inventory.html">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span>Inventory</span>
+          </a>
+          <a class="flex items-center gap-3 p-3 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors" href="admin-orders.html">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span>Orders</span>
+          </a>
+          <a class="flex items-center gap-3 p-3 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors" href="admin-sales.html">
+            <span class="material-symbols-outlined">bar_chart</span>
+            <span>Sales</span>
+          </a>
+          <a class="flex items-center gap-3 p-3 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors" href="admin-offers.html">
+            <span class="material-symbols-outlined">sell</span>
+            <span>Offers</span>
+          </a>
+          <a class="flex items-center gap-3 p-3 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors" href="admin-payments.html">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            <span>Payments</span>
+          </a>
+          <a class="flex items-center gap-3 p-3 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors" href="admin-shipping.html">
+            <span class="material-symbols-outlined">local_shipping</span>
+            <span>Shipping</span>
+          </a>
+          <a class="flex items-center gap-3 p-3 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors" href="admin-content.html">
+            <span class="material-symbols-outlined">edit</span>
+            <span>Content</span>
+          </a>
+          <a class="flex items-center gap-3 p-3 bg-teal-100 text-teal-800 rounded-xl font-bold" href="admin-support.html">
+            <span class="material-symbols-outlined">support_agent</span>
+            <span>Support</span>
+          </a>
+        </nav>
+      </aside>
 
-      <div id="bb-support-msg" class="text-sm text-red-600 mb-3"></div>
+      <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
+        <div class="flex items-end justify-between gap-3 mb-4">
+          <div>
+            <h1 class="text-2xl font-black">طلبات إعادة تعيين كلمة المرور</h1>
+            <p class="text-sm text-slate-600">
+              هذه الطلبات تأتي من صفحة الزبون (نسيت كلمة المرور) ليتم التعامل معها يدويًا عبر واتساب.
+            </p>
+          </div>
+          <button
+            id="bb-support-refresh"
+            class="px-4 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 font-bold text-sm"
+            type="button"
+          >
+            تحديث
+          </button>
+        </div>
 
-      <div class="bg-white rounded-2xl border border-teal-100 shadow-sm overflow-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-teal-50 text-xs text-teal-900">
-            <tr>
-              <th class="px-4 py-3 text-right">الاسم</th>
-              <th class="px-4 py-3 text-right">الهاتف</th>
-              <th class="px-4 py-3 text-right">الحالة</th>
-              <th class="px-4 py-3 text-right">التاريخ</th>
-              <th class="px-4 py-3 text-right">إجراء</th>
-            </tr>
-          </thead>
-          <tbody id="bb-support-rows"></tbody>
-        </table>
-      </div>
-    </main>
+        <div id="bb-support-msg" class="text-sm text-red-600 mb-3"></div>
+
+        <div class="bg-white rounded-2xl border border-teal-100 shadow-sm overflow-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-teal-50 text-xs text-teal-900">
+              <tr>
+                <th class="px-4 py-3 text-right">الاسم</th>
+                <th class="px-4 py-3 text-right">الهاتف</th>
+                <th class="px-4 py-3 text-right">الحالة</th>
+                <th class="px-4 py-3 text-right">التاريخ</th>
+                <th class="px-4 py-3 text-right">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="bb-support-rows"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
   </body>
 </html>
 

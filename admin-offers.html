@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Offers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script defer src="./supabase-config.js"></script>
+    <script defer src="./auth.js"></script>
+    <script defer src="./admin-offers-app.js"></script>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div class="flex min-h-screen">
+      <aside class="w-64 bg-white border-r border-slate-100 p-4">
+        <div class="font-black text-lg mb-4" data-i18n-ar="الإدارة" data-i18n-en="Admin">Admin</div>
+        <div class="mb-3">
+          <select class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm" data-bb-lang-select>
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
+        <nav class="space-y-2 text-sm">
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin.html" data-i18n-ar="المنتجات" data-i18n-en="Products">Products</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="inventory.html" data-i18n-ar="المخزون" data-i18n-en="Inventory">Inventory</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-orders.html" data-i18n-ar="الطلبات" data-i18n-en="Orders">Orders</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-sales.html" data-i18n-ar="المبيعات" data-i18n-en="Sales">Sales</a>
+          <a class="block px-3 py-2 rounded-lg bg-slate-900 text-white" href="admin-offers.html" data-i18n-ar="العروض" data-i18n-en="Offers">Offers</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-payments.html" data-i18n-ar="الدفع" data-i18n-en="Payments">Payments</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-shipping.html" data-i18n-ar="التوصيل" data-i18n-en="Shipping">Shipping</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-content.html" data-i18n-ar="المحتوى" data-i18n-en="Content">Content</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-support.html" data-i18n-ar="الدعم" data-i18n-en="Support">Support</a>
+        </nav>
+        <div class="mt-6">
+          <button
+            id="bb-logout"
+            class="w-full px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm font-bold"
+          >
+            <span data-i18n-ar="تسجيل الخروج" data-i18n-en="Logout">Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="flex-1 p-6">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4">
+          <div>
+            <div class="text-2xl font-black">Offers</div>
+            <div class="text-slate-500 text-sm">Set per-product discount percent.</div>
+          </div>
+          <div class="flex items-end gap-3">
+            <input
+              id="bb-offers-q"
+              class="px-3 py-2 rounded-lg border border-slate-200 bg-white w-64"
+              placeholder="Search products..."
+            />
+            <button id="bb-offers-refresh" class="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-bold">
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div id="bb-offers-msg" class="text-sm text-red-600 mb-3"></div>
+
+        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+              <tr>
+                <th class="px-4 py-3">Product</th>
+                <th class="px-4 py-3 text-right">Price (IQD)</th>
+                <th class="px-4 py-3 text-right">Discount %</th>
+                <th class="px-4 py-3 text-right">Final (IQD)</th>
+                <th class="px-4 py-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="bb-offers-rows"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+

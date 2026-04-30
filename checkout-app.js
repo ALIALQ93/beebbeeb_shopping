@@ -48,6 +48,38 @@
     }, 0);
   }
 
+  var __shipRates = null; // {city: fee_iqd}
+
+  async function loadShippingRates() {
+    if (__shipRates) return __shipRates;
+    try {
+      if (!window.BB || !window.BB.getSupabase) return (__shipRates = {});
+      var sb = await window.BB.getSupabase();
+      var r = await sb.from("shipping_rates").select("city,fee_iqd").limit(2000);
+      if (r.error) return (__shipRates = {});
+      var map = {};
+      (r.data || []).forEach(function (row) {
+        map[String(row.city || "").trim()] = Number(row.fee_iqd || 0);
+      });
+      __shipRates = map;
+      return map;
+    } catch (e) {
+      __shipRates = {};
+      return __shipRates;
+    }
+  }
+
+  function getShippingFee(city) {
+    var c = String(city || "").trim();
+    if (!c) return 0;
+    if (__shipRates && Object.prototype.hasOwnProperty.call(__shipRates, c)) {
+      var v = Number(__shipRates[c]);
+      return isFinite(v) && v >= 0 ? v : 0;
+    }
+    // fallback default if not configured
+    return 5000;
+  }
+
   function updateHeaderBadge(count) {
     var badge = document.querySelector(
       'span.absolute.top-1.right-1.bg-error, span.absolute.top-0.right-0.bg-error'
@@ -64,6 +96,8 @@
   }
 
   function findCartContainer() {
+    var byId = document.getElementById("bb-cart-items");
+    if (byId) return byId;
     // In template: <div class="divide-y divide-teal-50"> ... items ...
     var h2 = findCartTitleEl();
     if (!h2) return null;
@@ -73,16 +107,22 @@
   }
 
   function setSummary(subtotal, shipping, total) {
-    // Replace known summary numbers in the template.
-    var spans = Array.from(document.querySelectorAll("span"));
-    spans.forEach(function (s) {
-      var t = (s.textContent || "").trim();
-      if (t === "60,000 IQD") s.textContent = fmtIQD(subtotal);
-    });
+    var subEl = document.getElementById("bb-summary-subtotal");
+    if (subEl) subEl.textContent = fmtIQD(subtotal);
+    var shipEl = document.getElementById("bb-summary-shipping");
+    if (shipEl) shipEl.textContent = fmtIQD(shipping);
+    var totalEl = document.getElementById("bb-summary-total");
+    if (totalEl) totalEl.textContent = fmtIQD(total);
 
-    // Best-effort: update the big total number (text-3xl font-black text-primary)
-    var big = document.querySelector("span.text-3xl.font-black.text-primary");
-    if (big) big.textContent = fmtIQD(total);
+    var usdEl = document.getElementById("bb-summary-usd");
+    if (usdEl) {
+      var rate = Number(localStorage.getItem("bb_usd_rate") || "0");
+      if (rate > 0) {
+        usdEl.textContent = "~$" + (total / rate).toFixed(2);
+      } else {
+        usdEl.textContent = "";
+      }
+    }
   }
 
   function itemRow(item) {
@@ -95,9 +135,10 @@
           '"/>'
         : '<div class="w-full h-full flex items-center justify-center text-outline text-xs">No image</div>';
 
+    var key = item.product_id + "||" + (item.color || "") + "||" + (item.age_range || "");
     return (
       '<div class="py-6 flex flex-col md:flex-row gap-6" data-bb-item="' +
-      escapeHtml(item.product_id) +
+      escapeHtml(key) +
       '">' +
       '<div class="w-24 h-24 rounded-2xl overflow-hidden bg-surface-variant flex-shrink-0">' +
       img +
@@ -108,19 +149,23 @@
       escapeHtml(item.title || "منتج") +
       "</h3>" +
       '<button class="text-outline hover:text-error transition-colors" data-bb-del="' +
-      escapeHtml(item.product_id) +
+      escapeHtml(key) +
       '"><span class="material-symbols-outlined">delete</span></button>' +
+      "</div>" +
+      '<div class="text-sm text-outline">' +
+      (item.age_range ? "المقاس/العمر: " + escapeHtml(item.age_range) : "") +
+      (item.color ? (item.age_range ? " · " : "") + "اللون: " + escapeHtml(item.color) : "") +
       "</div>" +
       '<div class="flex justify-between items-end mt-4">' +
       '<div class="flex items-center border border-outline-variant/30 rounded-xl px-2 py-1 bg-surface-container-low">' +
       '<button class="w-8 h-8 flex items-center justify-center text-primary font-bold" data-bb-dec="' +
-      escapeHtml(item.product_id) +
+      escapeHtml(key) +
       '">-</button>' +
       '<span class="px-4 font-bold">' +
       String(item.qty || 1) +
       "</span>" +
       '<button class="w-8 h-8 flex items-center justify-center text-primary font-bold" data-bb-inc="' +
-      escapeHtml(item.product_id) +
+      escapeHtml(key) +
       '">+</button>' +
       "</div>" +
       '<div class="text-left">' +
@@ -152,7 +197,8 @@
     }
 
     var sub = subtotalIQD(cart);
-    var shipping = cart.length ? 5000 : 0;
+    var city = (document.getElementById("bb-shipping-city")?.value || "").trim();
+    var shipping = cart.length ? getShippingFee(city) : 0;
     var total = sub + shipping;
     setSummary(sub, shipping, total);
   }
@@ -183,8 +229,12 @@
       setMsg("أدخل إعدادات Supabase أولًا.");
       return;
     }
-    var u = await sb.auth.getUser();
-    if (!u.data || !u.data.user) {
+    // Customer login WITHOUT Supabase Auth (token stored in localStorage)
+    var tok = "";
+    try {
+      tok = localStorage.getItem("bb_customer_token") || "";
+    } catch (e0) {}
+    if (!tok) {
       location.href = "login.html?return=" + encodeURIComponent("checkout.html");
       return;
     }
@@ -199,78 +249,72 @@
     }
 
     var sub = subtotalIQD(cart);
-    var shipping = cart.length ? 5000 : 0;
+    var shipping = cart.length ? getShippingFee(city) : 0;
     var total = sub + shipping;
 
-    // 1) Create order
-    var orderRes = await sb
-      .from("orders")
-      .insert({
-        user_id: u.data.user.id,
-        status: "pending",
-        currency: "IQD",
-        subtotal: sub,
-        shipping_fee: shipping,
-        total: total,
-        shipping_name: name,
-        shipping_phone: phone,
-        shipping_city: city,
-        shipping_address: address,
-      })
-      .select("id")
-      .single();
-
-    if (orderRes.error) {
-      setMsg("فشل إنشاء الطلب: " + orderRes.error.message);
-      return;
-    }
-
-    var orderId = orderRes.data.id;
-
-    // 2) Create order items
-    // Require color when present
-    var missingColor = cart.find(function (it) {
-      return !!(it && it.product_id && (it.color === null || it.color === undefined || it.color === ""));
+    // Require variant when present
+    var missingVariant = cart.find(function (it) {
+      return !!(
+        it &&
+        it.product_id &&
+        ((it.color === null || it.color === undefined || it.color === "") ||
+          (it.age_range === null || it.age_range === undefined || it.age_range === ""))
+      );
     });
-    if (missingColor) {
-      setMsg("الرجاء اختيار لون لكل منتج قبل تثبيت الطلب (افتح صفحة المنتج واختر اللون).");
+    if (missingVariant) {
+      setMsg("الرجاء اختيار المقاس/العمر واللون لكل منتج قبل تثبيت الطلب.");
       return;
     }
 
     var itemsPayload = cart.map(function (it) {
       return {
-        order_id: orderId,
         product_id: it.product_id,
         qty: Number(it.qty || 1),
         unit_price_iqd: Number(it.price_iqd || 0),
         color: it.color || null,
+        age_range: it.age_range || null,
       };
     });
 
-    var itemsRes = await sb.from("order_items").insert(itemsPayload);
-    if (itemsRes.error) {
-      setMsg("تم إنشاء الطلب لكن فشل حفظ العناصر: " + itemsRes.error.message);
+    // Create order via RPC (inserts order+items and applies inventory)
+    var orderRes = await sb.rpc("customer_create_order", {
+      p_token: tok,
+      p_shipping_name: name,
+      p_shipping_phone: phone,
+      p_shipping_city: city,
+      p_shipping_address: address,
+      p_items: itemsPayload,
+    });
+    if (orderRes.error) {
+      setMsg("فشل إنشاء الطلب: " + orderRes.error.message);
       return;
     }
-
-    // 3) Apply inventory now (decrease stock)
-    var invRes = await sb.rpc("apply_order_inventory", { p_order_id: orderId });
-    if (invRes.error) {
-      setMsg("تم إنشاء الطلب لكن فشل خصم المخزون: " + invRes.error.message);
-      return;
-    }
+    var orderId = orderRes.data;
 
     // Success: clear cart
     setCart([]);
     render();
-    alert("تم إنشاء الطلب بنجاح. رقم الطلب: " + orderId);
+    // Redirect back to home after success
+    location.href = "home.html";
   }
 
-  function mutateQty(id, delta) {
+  function parseKey(key) {
+    var parts = String(key || "").split("||");
+    return { product_id: parts[0] || "", color: parts[1] || "", age_range: parts[2] || "" };
+  }
+
+  function sameKey(it, keyObj) {
+    return (
+      String(it.product_id || "") === String(keyObj.product_id || "") &&
+      String(it.color || "") === String(keyObj.color || "") &&
+      String(it.age_range || "") === String(keyObj.age_range || "")
+    );
+  }
+
+  function mutateQty(key, delta) {
     var cart = getCart();
-    var it = cart.find(function (x) {
-      return x.product_id === id;
-    });
+    var k = parseKey(key);
+    var it = cart.find(function (x) { return sameKey(x, k); });
     if (!it) return;
     var next = Math.max(1, Number(it.qty || 1) + delta);
     var maxStock = Number(it.stock);
@@ -280,10 +324,9 @@
     render();
   }
 
-  function removeItem(id) {
-    var cart = getCart().filter(function (x) {
-      return x.product_id !== id;
-    });
+  function removeItem(key) {
+    var k = parseKey(key);
+    var cart = getCart().filter(function (x) { return !sameKey(x, k); });
     setCart(cart);
     render();
   }
@@ -315,11 +358,123 @@
         });
       });
     }
+
+    var citySel = document.getElementById("bb-shipping-city");
+    if (citySel) {
+      citySel.addEventListener("change", function () {
+        render();
+      });
+    }
+  }
+
+  async function loadPaymentSettings() {
+    if (!window.BB || !window.BB.getSupabase) return null;
+    var sb = await window.BB.getSupabase();
+    var keys = ["payment_zain_phone", "payment_zain_qr_url", "payment_card_transfer_code"];
+    var r = await sb.from("app_settings").select("key,value").in("key", keys);
+    if (r.error) return null;
+    var map = {};
+    (r.data || []).forEach(function (row) {
+      map[row.key] = row.value || "";
+    });
+    return map;
+  }
+
+  function applyPaymentUI(settings) {
+    var s = settings || {};
+    var zainOk = Boolean(String(s.payment_zain_phone || "").trim() || String(s.payment_zain_qr_url || "").trim());
+    var cardOk = Boolean(String(s.payment_card_transfer_code || "").trim());
+
+    function setDisabled(label, disabled) {
+      if (!label) return;
+      if (disabled) {
+        label.classList.add("opacity-50");
+        label.classList.add("pointer-events-none");
+      } else {
+        label.classList.remove("opacity-50");
+        label.classList.remove("pointer-events-none");
+      }
+    }
+
+    var zLabel = document.querySelector('label[data-bb-pay="zain"]');
+    var cLabel = document.querySelector('label[data-bb-pay="card"]');
+    setDisabled(zLabel, !zainOk);
+    setDisabled(cLabel, !cardOk);
+
+    var info = document.getElementById("bb-payment-info");
+    function renderInfo(mode) {
+      if (!info) return;
+      if (mode === "zain") {
+        if (!zainOk) {
+          info.textContent = "زين كاش غير متوفرة حالياً.";
+          return;
+        }
+        var parts = [];
+        if (String(s.payment_zain_phone || "").trim()) parts.push("رقم: " + String(s.payment_zain_phone).trim());
+        if (String(s.payment_zain_qr_url || "").trim())
+          parts.push('QR: <a class="underline" target="_blank" href="' + escapeHtml(s.payment_zain_qr_url) + '">فتح</a>');
+        info.innerHTML = parts.join(" · ");
+        return;
+      }
+      if (mode === "card") {
+        if (!cardOk) {
+          info.textContent = "البطاقة/التحويل غير متوفرة حالياً.";
+          return;
+        }
+        info.textContent = "رمز التحويل: " + String(s.payment_card_transfer_code || "").trim();
+        return;
+      }
+      info.textContent = "";
+    }
+
+    document.querySelectorAll('input[name="payment"]').forEach(function (inp) {
+      inp.addEventListener("change", function () {
+        renderInfo(inp.value);
+      });
+    });
+    renderInfo((document.querySelector('input[name="payment"]:checked') || {}).value || "cod");
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    bind();
-    render();
+    (async function () {
+      try {
+        // Show customer status + autofill shipping fields (no Supabase Auth)
+        if (window.BB && window.BB.getCustomer) {
+          var me = await window.BB.getCustomer();
+          var pill = document.getElementById("bb-customer-pill");
+          var logoutBtn = document.getElementById("bb-customer-logout");
+          if (me && me.full_name) {
+            if (pill) {
+              pill.textContent = me.full_name;
+              pill.href = "my-orders.html";
+              pill.classList.remove("hidden");
+            }
+            if (logoutBtn) logoutBtn.classList.remove("hidden");
+            var nameEl = document.getElementById("bb-shipping-name");
+            var phoneEl = document.getElementById("bb-shipping-phone");
+            if (nameEl && !String(nameEl.value || "").trim()) nameEl.value = me.full_name || "";
+            if (phoneEl && !String(phoneEl.value || "").trim()) phoneEl.value = me.phone || "";
+          } else {
+            if (pill) pill.classList.remove("hidden");
+          }
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", function () {
+              if (window.BB && window.BB.customerLogout) window.BB.customerLogout();
+              location.href = "home.html";
+            });
+          }
+        }
+      } catch (e) {}
+      try {
+        await loadShippingRates();
+      } catch (e) {}
+      try {
+        var pay = await loadPaymentSettings();
+        applyPaymentUI(pay);
+      } catch (e) {}
+      bind();
+      render();
+    })();
   });
 })();
 

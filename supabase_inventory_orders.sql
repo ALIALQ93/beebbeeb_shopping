@@ -1,11 +1,11 @@
 -- Inventory automation: adjust stock by color + apply/revert order inventory
 -- Run in Supabase SQL Editor after creating:
--- - public.product_color_stock
+-- - public.product_variant_stock
 -- - public.products
 -- - public.orders
 -- - public.order_items
 --
--- Requires order_items to have column: color (text)
+-- Requires order_items to have columns: color (text), age_range (text)
 
 -- 1) Add columns to orders for inventory state (idempotent)
 do $$
@@ -22,10 +22,11 @@ do $$
 begin
   if to_regclass('public.order_items') is not null then
     execute 'alter table public.order_items add column if not exists color text';
+    execute 'alter table public.order_items add column if not exists age_range text';
   end if;
 end $$;
 
--- 3) Helper: recalc products.stock from per-color rows
+-- 3) Helper: recalc products.stock from variant rows
 create or replace function public.recalc_product_stock(p_product_id uuid)
 returns void
 language sql
@@ -34,13 +35,13 @@ set search_path = public
 as $$
   update public.products p
   set stock = coalesce((
-    select sum(s.stock)::int from public.product_color_stock s where s.product_id = p_product_id
+    select sum(s.stock)::int from public.product_variant_stock s where s.product_id = p_product_id
   ), 0)
   where p.id = p_product_id;
 $$;
 
--- 4) Admin-only adjustment: add/subtract delta to a color
-create or replace function public.adjust_color_stock(p_product_id uuid, p_color text, p_delta int)
+-- 4) Admin-only adjustment: add/subtract delta to a variant (color + age_range)
+create or replace function public.adjust_variant_stock(p_product_id uuid, p_color text, p_age_range text, p_delta int)
 returns void
 language plpgsql
 security definer
@@ -52,32 +53,54 @@ begin
     raise exception 'not allowed';
   end if;
 
-  insert into public.product_color_stock (product_id, color, stock, updated_at)
-  values (p_product_id, p_color, greatest(0, coalesce(p_delta,0)), now())
-  on conflict (product_id, color)
-  do update set stock = greatest(0, public.product_color_stock.stock + coalesce(p_delta,0)), updated_at = now();
+  if p_color is null or length(trim(p_color)) = 0 then
+    raise exception 'missing color';
+  end if;
+  if p_age_range is null or length(trim(p_age_range)) = 0 then
+    raise exception 'missing age_range';
+  end if;
+
+  insert into public.product_variant_stock (product_id, color, age_range, stock, updated_at)
+  values (p_product_id, p_color, p_age_range, greatest(0, coalesce(p_delta,0)), now())
+  on conflict (product_id, color, age_range)
+  do update set stock = greatest(0, public.product_variant_stock.stock + coalesce(p_delta,0)), updated_at = now();
 
   perform public.recalc_product_stock(p_product_id);
 end;
 $$;
 
-grant execute on function public.adjust_color_stock(uuid, text, int) to authenticated;
+grant execute on function public.adjust_variant_stock(uuid, text, text, int) to authenticated;
 grant execute on function public.recalc_product_stock(uuid) to authenticated;
 
--- Wrapper for clients that resolve args in a different order in schema cache.
--- Some PostgREST schema-cache lookups can appear as: adjust_color_stock(p_color, p_delta, p_product_id)
-create or replace function public.adjust_color_stock(p_color text, p_delta int, p_product_id uuid)
+-- Backward-compat wrapper: keep old rpc name used by frontend (adjust_color_stock)
+-- It will adjust the currently selected variant; but requires p_age_range in payload too.
+create or replace function public.adjust_color_stock(p_product_id uuid, p_color text, p_age_range text, p_delta int)
 returns void
 language plpgsql
 security definer
 set search_path = public
 as $$
 begin
-  perform public.adjust_color_stock(p_product_id, p_color, p_delta);
+  perform public.adjust_variant_stock(p_product_id, p_color, p_age_range, p_delta);
 end;
 $$;
 
-grant execute on function public.adjust_color_stock(text, int, uuid) to authenticated;
+grant execute on function public.adjust_color_stock(uuid, text, text, int) to authenticated;
+
+-- Extra wrapper for schema-cache arg-order differences seen in some clients:
+-- adjust_color_stock(p_age_range, p_color, p_delta, p_product_id)
+create or replace function public.adjust_color_stock(p_age_range text, p_color text, p_delta int, p_product_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  perform public.adjust_variant_stock(p_product_id, p_color, p_age_range, p_delta);
+end;
+$$;
+
+grant execute on function public.adjust_color_stock(text, text, int, uuid) to authenticated;
 
 -- 5) Apply inventory for order: subtract per item color qty once
 create or replace function public.apply_order_inventory(p_order_id uuid)
@@ -103,17 +126,17 @@ begin
   end if;
 
   for oi in
-    select product_id, color, qty
+    select product_id, color, age_range, qty
     from public.order_items
     where order_id = p_order_id
   loop
-    if oi.color is null or length(oi.color) = 0 then
-      raise exception 'missing color for order item';
+    if oi.color is null or length(oi.color) = 0 or oi.age_range is null or length(oi.age_range) = 0 then
+      raise exception 'missing variant for order item';
     end if;
 
     select stock into cur
-    from public.product_color_stock
-    where product_id = oi.product_id and color = oi.color
+    from public.product_variant_stock
+    where product_id = oi.product_id and color = oi.color and age_range = oi.age_range
     for update;
 
     if cur is null then
@@ -124,9 +147,9 @@ begin
       raise exception 'insufficient stock for %', oi.color;
     end if;
 
-    update public.product_color_stock
+    update public.product_variant_stock
     set stock = stock - oi.qty, updated_at = now()
-    where product_id = oi.product_id and color = oi.color;
+    where product_id = oi.product_id and color = oi.color and age_range = oi.age_range;
 
     perform public.recalc_product_stock(oi.product_id);
   end loop;
@@ -160,18 +183,18 @@ begin
   end if;
 
   for oi in
-    select product_id, color, qty
+    select product_id, color, age_range, qty
     from public.order_items
     where order_id = p_order_id
   loop
-    if oi.color is null or length(oi.color) = 0 then
+    if oi.color is null or length(oi.color) = 0 or oi.age_range is null or length(oi.age_range) = 0 then
       continue;
     end if;
 
-    insert into public.product_color_stock (product_id, color, stock, updated_at)
-    values (oi.product_id, oi.color, greatest(0, oi.qty), now())
-    on conflict (product_id, color)
-    do update set stock = public.product_color_stock.stock + oi.qty, updated_at = now();
+    insert into public.product_variant_stock (product_id, color, age_range, stock, updated_at)
+    values (oi.product_id, oi.color, oi.age_range, greatest(0, oi.qty), now())
+    on conflict (product_id, color, age_range)
+    do update set stock = public.product_variant_stock.stock + oi.qty, updated_at = now();
 
     perform public.recalc_product_stock(oi.product_id);
   end loop;
@@ -183,4 +206,50 @@ end;
 $$;
 
 grant execute on function public.revert_order_inventory(uuid) to authenticated;
+
+-- 7) Unapply inventory for order (admin rollback to pending/confirmed)
+-- Adds back qty and sets inventory_applied=false WITHOUT cancelling the order.
+create or replace function public.unapply_order_inventory(p_order_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  oi record;
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+
+  perform 1 from public.orders o where o.id = p_order_id for update;
+
+  if not (select inventory_applied from public.orders where id = p_order_id) then
+    return;
+  end if;
+
+  for oi in
+    select product_id, color, age_range, qty
+    from public.order_items
+    where order_id = p_order_id
+  loop
+    if oi.color is null or length(oi.color) = 0 or oi.age_range is null or length(oi.age_range) = 0 then
+      continue;
+    end if;
+
+    insert into public.product_variant_stock (product_id, color, age_range, stock, updated_at)
+    values (oi.product_id, oi.color, oi.age_range, greatest(0, oi.qty), now())
+    on conflict (product_id, color, age_range)
+    do update set stock = public.product_variant_stock.stock + oi.qty, updated_at = now();
+
+    perform public.recalc_product_stock(oi.product_id);
+  end loop;
+
+  update public.orders
+  set inventory_applied = false
+  where id = p_order_id;
+end;
+$$;
+
+grant execute on function public.unapply_order_inventory(uuid) to authenticated;
 

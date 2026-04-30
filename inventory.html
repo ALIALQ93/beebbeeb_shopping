@@ -4,10 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Google Fonts removed to avoid MIME errors on restricted networks -->
     <link
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet"
@@ -78,41 +75,75 @@
           <h2 class="text-lg font-black text-primary">BeebBeeb Admin</h2>
           <p class="text-xs text-slate-500">Inventory & orders</p>
         </div>
+        <div class="mb-3">
+          <select class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm" data-bb-lang-select>
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
         <nav class="space-y-1">
           <a
             class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
             href="admin.html"
           >
             <span class="material-symbols-outlined">styler</span>
-            <span>Products</span>
+            <span data-i18n-ar="المنتجات" data-i18n-en="Products">Products</span>
           </a>
           <a
             class="flex items-center gap-3 p-3 bg-primary-container/30 text-primary rounded-xl font-semibold"
             href="inventory.html"
           >
             <span class="material-symbols-outlined">inventory_2</span>
-            <span>Inventory</span>
+            <span data-i18n-ar="المخزون" data-i18n-en="Inventory">Inventory</span>
           </a>
           <a
             class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
             href="admin-orders.html"
           >
             <span class="material-symbols-outlined">receipt_long</span>
-            <span>Orders</span>
+            <span data-i18n-ar="الطلبات" data-i18n-en="Orders">Orders</span>
           </a>
           <a
             class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
             href="admin-sales.html"
           >
             <span class="material-symbols-outlined">bar_chart</span>
-            <span>Sales</span>
+            <span data-i18n-ar="المبيعات" data-i18n-en="Sales">Sales</span>
+          </a>
+          <a
+            class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
+            href="admin-offers.html"
+          >
+            <span class="material-symbols-outlined">sell</span>
+            <span data-i18n-ar="العروض" data-i18n-en="Offers">Offers</span>
+          </a>
+          <a
+            class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
+            href="admin-payments.html"
+          >
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            <span data-i18n-ar="الدفع" data-i18n-en="Payments">Payments</span>
+          </a>
+          <a
+            class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
+            href="admin-shipping.html"
+          >
+            <span class="material-symbols-outlined">local_shipping</span>
+            <span data-i18n-ar="التوصيل" data-i18n-en="Shipping">Shipping</span>
+          </a>
+          <a
+            class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
+            href="admin-content.html"
+          >
+            <span class="material-symbols-outlined">edit</span>
+            <span data-i18n-ar="المحتوى" data-i18n-en="Content">Content</span>
           </a>
           <a
             class="flex items-center gap-3 p-3 text-slate-500 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors"
             href="admin-support.html"
           >
             <span class="material-symbols-outlined">support_agent</span>
-            <span>Support</span>
+            <span data-i18n-ar="الدعم" data-i18n-en="Support">Support</span>
           </a>
         </nav>
       </aside>
@@ -164,8 +195,8 @@
             <thead class="bg-surface-container-low text-xs text-outline uppercase">
               <tr>
                 <th class="px-4 py-3">Product</th>
-                <th class="px-4 py-3 text-right">By color</th>
-                <th class="px-4 py-3 text-right">Adjust (+)</th>
+                <th class="px-4 py-3 text-right">Total / Breakdown</th>
+                <th class="px-4 py-3 text-right">Adjust</th>
               </tr>
             </thead>
             <tbody id="bb-inv-rows" class="divide-y divide-outline-variant/20"></tbody>

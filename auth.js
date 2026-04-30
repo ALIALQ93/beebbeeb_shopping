@@ -26,6 +26,65 @@
     } catch (e) {}
   }
 
+  // -------- Language (AR/EN) --------
+  function getLang() {
+    var v = storageGet("bb_lang").toLowerCase();
+    return v === "en" ? "en" : "ar";
+  }
+  function setLang(lang) {
+    var v = String(lang || "").toLowerCase() === "en" ? "en" : "ar";
+    storageSet("bb_lang", v);
+  }
+
+  function applyLang() {
+    var lang = getLang();
+    var root = document.documentElement;
+    if (root) {
+      root.lang = lang;
+      root.dir = lang === "en" ? "ltr" : "rtl";
+    }
+
+    // Swap text content for elements that declare both languages.
+    var nodes = Array.from(document.querySelectorAll("[data-i18n-ar][data-i18n-en]"));
+    nodes.forEach(function (n) {
+      var t = lang === "en" ? n.getAttribute("data-i18n-en") : n.getAttribute("data-i18n-ar");
+      if (t != null) n.textContent = t;
+    });
+
+    // Swap innerHTML for rich text (admin-controlled).
+    var htmlNodes = Array.from(document.querySelectorAll("[data-i18n-html-ar][data-i18n-html-en]"));
+    htmlNodes.forEach(function (n) {
+      var t =
+        lang === "en"
+          ? n.getAttribute("data-i18n-html-en")
+          : n.getAttribute("data-i18n-html-ar");
+      if (t != null) n.innerHTML = t;
+    });
+    // Swap placeholders when present.
+    var ph = Array.from(document.querySelectorAll("[data-i18n-placeholder-ar][data-i18n-placeholder-en]"));
+    ph.forEach(function (n) {
+      var t =
+        lang === "en"
+          ? n.getAttribute("data-i18n-placeholder-en")
+          : n.getAttribute("data-i18n-placeholder-ar");
+      if (t != null) n.setAttribute("placeholder", t);
+    });
+  }
+
+  function wireLangSelect() {
+    var sel = document.querySelector("[data-bb-lang-select]");
+    if (!sel) return;
+    try {
+      sel.value = getLang();
+    } catch (e) {}
+    sel.addEventListener("change", function () {
+      setLang(sel.value);
+      applyLang();
+      // Reload to allow page-specific scripts to re-render if needed.
+      location.reload();
+    });
+  }
+
   function getConfig() {
     // Prefer baked-in config (option 1) so customers never see a prompt.
     var bakedUrl =
@@ -129,15 +188,44 @@
   }
 
   async function requireLogin(returnTo) {
-    var sb = await getSupabase();
-    var u = await sb.auth.getUser();
-    if (!u.data || !u.data.user) {
+    // Customer login WITHOUT Supabase Auth:
+    // We store a customer session token in localStorage and validate it via RPC.
+    try {
+      var tok = storageGet("bb_customer_token");
+      if (!tok) throw new Error("missing token");
+      var sb = await getSupabase();
+      var me = await sb.rpc("customer_me", { p_token: tok });
+      if (me.error || !me.data || !me.data.length) throw new Error("invalid token");
+      return true;
+    } catch (e) {
       location.href =
         "login.html?return=" +
         encodeURIComponent(returnTo || pageName() || "home.html");
       return false;
     }
-    return true;
+  }
+
+  async function getCustomer() {
+    // Returns {customer_id, full_name, phone} or null
+    try {
+      if (window.__bb_customer && window.__bb_customer.customer_id) return window.__bb_customer;
+      var tok = storageGet("bb_customer_token");
+      if (!tok) return null;
+      var sb = await getSupabase();
+      var me = await sb.rpc("customer_me", { p_token: tok });
+      var row = me && me.data && me.data.length ? me.data[0] : null;
+      window.__bb_customer = row || null;
+      return row || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function customerLogout() {
+    try {
+      localStorage.removeItem("bb_customer_token");
+    } catch (e) {}
+    window.__bb_customer = null;
   }
 
   async function requireAdmin(returnTo) {
@@ -179,17 +267,18 @@
   }
 
   async function wireLogin() {
-    var form = document.getElementById("loginForm");
-    if (!form) return;
+    var p = pageName();
     var fullName = document.getElementById("full_name");
     var phone = document.getElementById("phone");
     var email = document.getElementById("email");
     var password = document.getElementById("password");
-    var msg = document.getElementById("loginMsg");
+    var msg =
+      document.getElementById("loginMsg") ||
+      document.getElementById("signupMsg") ||
+      document.getElementById("forgotMsg");
     function setMsg(t) {
       if (msg) msg.textContent = t || "";
     }
-    var p = pageName();
 
     function normPhone(v) {
       // Accept Iraqi numbers; user can type 07xxxxxxxxx.
@@ -211,24 +300,15 @@
     function phoneToEmail(v) {
       var x = normPhone(v);
       // Unique, email-shaped identifier; customer never sees it.
-      return x.replace(/^\+/, "") + "@phone.beebbeeb";
+      // Must be a valid email domain (include a dot).
+      return x.replace(/^\+/, "") + "@phone.beebbeeb.local";
     }
 
-    // Customer login via phone + password (no SMS).
+    // Customer login via phone + password (NO Supabase Auth).
     if (p === "login.html") {
+      var form = document.getElementById("loginForm");
+      if (!form) return;
       var sbc = await getSupabase();
-
-      async function upsertProfileForUser(user) {
-        try {
-          if (!user) return;
-          var nameVal = ((fullName && fullName.value) || "").trim();
-          var phoneVal = normPhone((phone && phone.value) || "");
-          var payload = { id: user.id };
-          if (nameVal) payload.full_name = nameVal;
-          if (phoneVal) payload.phone = phoneVal;
-          await sbc.from("profiles").upsert(payload, { onConflict: "id" });
-        } catch (e) {}
-      }
 
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -243,88 +323,127 @@
           setMsg("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
           return;
         }
-        var em = phoneToEmail(phoneRaw);
-        var res = await sbc.auth.signInWithPassword({ email: em, password: pw });
+        var res = await sbc.rpc("customer_login", {
+          p_phone: phoneRaw,
+          p_password: pw,
+        });
         if (res.error) {
           setMsg("فشل الدخول: " + res.error.message);
           return;
         }
         try {
-          var u = await sbc.auth.getUser();
-          await upsertProfileForUser(u.data && u.data.user);
-        } catch (e2) {}
+          storageSet("bb_customer_token", String(res.data || ""));
+        } catch (e0) {}
         var r = getReturnParam();
         location.href = r ? r : "home.html";
       });
 
-      var signupBtn2 = document.getElementById("signupBtn");
-      if (signupBtn2) {
-        signupBtn2.addEventListener("click", async function () {
-          setMsg("");
-          var nameVal = ((fullName && fullName.value) || "").trim();
-          var phoneRaw = ((phone && phone.value) || "").trim();
-          var pw = ((password && password.value) || "").trim();
-          if (!nameVal) {
-            setMsg("اكتب الاسم");
-            return;
-          }
-          if (!isValidPhone(phoneRaw)) {
-            setMsg("رقم الهاتف غير صحيح. مثال: 07XXXXXXXXX");
-            return;
-          }
-          if (!pw || pw.length < 6) {
-            setMsg("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
-            return;
-          }
-          var em = phoneToEmail(phoneRaw);
-          var res = await sbc.auth.signUp({
-            email: em,
-            password: pw,
-            options: { data: { full_name: nameVal, phone: normPhone(phoneRaw) } },
-          });
-          if (res.error) {
-            setMsg("فشل إنشاء الحساب: " + res.error.message);
-            return;
-          }
-          // If auto-confirm is enabled, we may already have a session.
-          if (res.data && res.data.user) {
-            await upsertProfileForUser(res.data.user);
-          }
-          setMsg("تم إنشاء الحساب. الآن يمكنك تسجيل الدخول.");
+      var goSignup = document.getElementById("goSignup");
+      if (goSignup) {
+        goSignup.addEventListener("click", function () {
+          var r = getReturnParam();
+          location.href = "signup.html" + (r ? "?return=" + encodeURIComponent(r) : "");
         });
       }
-
-      var forgotBtn = document.getElementById("forgotBtn");
-      if (forgotBtn) {
-        forgotBtn.addEventListener("click", async function () {
-          setMsg("");
-          var nameVal = ((fullName && fullName.value) || "").trim();
-          var phoneRaw = ((phone && phone.value) || "").trim();
-          if (!nameVal) {
-            setMsg("اكتب الاسم");
-            return;
-          }
-          if (!isValidPhone(phoneRaw)) {
-            setMsg("رقم الهاتف غير صحيح. مثال: 07XXXXXXXXX");
-            return;
-          }
-          var ins = await sbc.from("password_reset_requests").insert({
-            full_name: nameVal,
-            phone: normPhone(phoneRaw),
-            note: "Customer requested password reset (manual via WhatsApp).",
-          });
-          if (ins.error) {
-            setMsg("تعذر إرسال الطلب: " + ins.error.message);
-            return;
-          }
-          setMsg("تم إرسال طلب للإدارة. سيتم التواصل معك على واتساب.");
+      var goForgot = document.getElementById("goForgot");
+      if (goForgot) {
+        goForgot.addEventListener("click", function () {
+          location.href = "forgot-password.html";
         });
       }
 
       return;
     }
 
+    // Customer signup page (phone + password, plus name)
+    if (p === "signup.html") {
+      var form2 = document.getElementById("signupForm");
+      if (!form2) return;
+      var sbc2 = await getSupabase();
+      form2.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        setMsg("");
+        var nameVal = ((fullName && fullName.value) || "").trim();
+        var phoneRaw = ((phone && phone.value) || "").trim();
+        var pw = ((password && password.value) || "").trim();
+        if (!nameVal) {
+          setMsg("اكتب الاسم");
+          return;
+        }
+        if (!isValidPhone(phoneRaw)) {
+          setMsg("رقم الهاتف غير صحيح. مثال: 07XXXXXXXXX");
+          return;
+        }
+        if (!pw || pw.length < 6) {
+          setMsg("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+          return;
+        }
+        var res2 = await sbc2.rpc("customer_signup", {
+          p_full_name: nameVal,
+          p_phone: phoneRaw,
+          p_password: pw,
+        });
+        if (res2.error) {
+          var m2 = String(res2.error.message || "");
+          setMsg("فشل إنشاء الحساب: " + m2);
+          return;
+        }
+        // Auto-login after signup
+        try {
+          storageSet("bb_customer_token", String(res2.data || ""));
+        } catch (e1) {}
+        var r2 = getReturnParam();
+        location.href = r2 ? r2 : "home.html";
+      });
+
+      var goLogin = document.getElementById("goLogin");
+      if (goLogin) {
+        goLogin.addEventListener("click", function () {
+          var r = getReturnParam();
+          location.href = "login.html" + (r ? "?return=" + encodeURIComponent(r) : "");
+        });
+      }
+      return;
+    }
+
+    // Customer forgot password request page
+    if (p === "forgot-password.html") {
+      var form3 = document.getElementById("forgotForm");
+      if (!form3) return;
+      var sbc3 = await getSupabase();
+      form3.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        setMsg("");
+        var nameVal = ((fullName && fullName.value) || "").trim();
+        var phoneRaw = ((phone && phone.value) || "").trim();
+        if (!nameVal) {
+          setMsg("اكتب الاسم");
+          return;
+        }
+        if (!isValidPhone(phoneRaw)) {
+          setMsg("رقم الهاتف غير صحيح. مثال: 07XXXXXXXXX");
+          return;
+        }
+        var ins = await sbc3.from("password_reset_requests").insert({
+          full_name: nameVal,
+          phone: normPhone(phoneRaw),
+          note: "Customer requested password reset (manual via WhatsApp).",
+        });
+        if (ins.error) {
+          setMsg("تعذر إرسال الطلب: " + ins.error.message);
+          return;
+        }
+        setMsg("تم إرسال طلب للإدارة. سيتم التواصل معك على واتساب.");
+      });
+
+      var goLogin2 = document.getElementById("goLogin");
+      if (goLogin2) goLogin2.addEventListener("click", function () { location.href = "login.html"; });
+      return;
+    }
+
     // Admin login (Supabase email/password).
+    var formA = document.getElementById("loginForm");
+    if (!formA) return;
     var sb = await getSupabase();
 
     async function upsertProfile(user) {
@@ -340,7 +459,7 @@
       if (res.error) console.warn("profiles upsert failed", res.error);
     }
 
-    form.addEventListener("submit", async function (e) {
+    formA.addEventListener("submit", async function (e) {
       e.preventDefault();
       setMsg("");
       var em = ((email && email.value) || "").trim();
@@ -405,9 +524,23 @@
     if (!btn) return;
     var sb = await getSupabase();
     btn.addEventListener("click", async function () {
-      await sb.auth.signOut();
+      // Logout for both admin auth + customer token
+      try {
+        await sb.auth.signOut();
+      } catch (e) {}
+      customerLogout();
       location.href = "home.html";
     });
+  }
+
+  async function adminLogout() {
+    try {
+      var sb = await getSupabase();
+      try {
+        await sb.auth.signOut();
+      } catch (e) {}
+    } catch (e) {}
+    customerLogout();
   }
 
   async function wireGuards() {
@@ -448,8 +581,18 @@
   window.BB.getSupabase = getSupabase;
   window.BB.requireAdmin = requireAdmin;
   window.BB.requireLogin = requireLogin;
+  window.BB.getCustomer = getCustomer;
+  window.BB.customerLogout = customerLogout;
+  window.BB.getLang = getLang;
+  window.BB.setLang = setLang;
+  window.BB.applyLang = applyLang;
+  window.BB.adminLogout = adminLogout;
+  // Backward-compat alias used by some admin pages
+  window.BB.logout = adminLogout;
 
   document.addEventListener("DOMContentLoaded", function () {
+    applyLang();
+    wireLangSelect();
     wireLogin().catch(function () {});
     wireLogoutButtons().catch(function () {});
     wireGuards().catch(function () {});

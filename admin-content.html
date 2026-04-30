@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Content</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script defer src="./supabase-config.js"></script>
+    <script defer src="./auth.js"></script>
+    <script defer src="./admin-content-app.js"></script>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div class="flex min-h-screen">
+      <aside class="w-64 bg-white border-r border-slate-100 p-4">
+        <div class="font-black text-lg mb-4" data-i18n-ar="الإدارة" data-i18n-en="Admin">Admin</div>
+        <div class="mb-3">
+          <select class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm" data-bb-lang-select>
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
+        <nav class="space-y-2 text-sm">
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin.html" data-i18n-ar="المنتجات" data-i18n-en="Products">Products</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="inventory.html" data-i18n-ar="المخزون" data-i18n-en="Inventory">Inventory</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-orders.html" data-i18n-ar="الطلبات" data-i18n-en="Orders">Orders</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-sales.html" data-i18n-ar="المبيعات" data-i18n-en="Sales">Sales</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-offers.html" data-i18n-ar="العروض" data-i18n-en="Offers">Offers</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-payments.html" data-i18n-ar="الدفع" data-i18n-en="Payments">Payments</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-shipping.html" data-i18n-ar="التوصيل" data-i18n-en="Shipping">Shipping</a>
+          <a class="block px-3 py-2 rounded-lg bg-slate-900 text-white" href="admin-content.html" data-i18n-ar="المحتوى" data-i18n-en="Content">Content</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-support.html" data-i18n-ar="الدعم" data-i18n-en="Support">Support</a>
+        </nav>
+        <div class="mt-6">
+          <button id="bb-logout" class="w-full px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm font-bold">
+            <span data-i18n-ar="تسجيل الخروج" data-i18n-en="Logout">Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="flex-1 p-6 max-w-4xl">
+        <div class="mb-4">
+          <div class="text-2xl font-black">Home page content</div>
+          <div class="text-slate-500 text-sm">Edit hero texts for Arabic/English and upload hero image.</div>
+        </div>
+        <div id="bb-content-msg" class="text-sm text-red-600 mb-3"></div>
+
+        <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div class="font-black mb-2">Hero badge</div>
+              <div class="text-xs text-slate-500 mb-1">Arabic</div>
+              <input id="bb-hero-badge-ar" class="w-full px-3 py-2 rounded-lg border border-slate-200" />
+              <div class="text-xs text-slate-500 mb-1 mt-2">English</div>
+              <input id="bb-hero-badge-en" class="w-full px-3 py-2 rounded-lg border border-slate-200" />
+            </div>
+            <div>
+              <div class="font-black mb-2">Hero title (HTML)</div>
+              <div class="text-xs text-slate-500 mb-1">Arabic (يمكنك استخدام &lt;br/&gt; و &lt;span class="text-primary"&gt;)</div>
+              <textarea id="bb-hero-title-ar" rows="4" class="w-full px-3 py-2 rounded-lg border border-slate-200 font-mono text-sm"></textarea>
+              <div class="text-xs text-slate-500 mb-1 mt-2">English</div>
+              <textarea id="bb-hero-title-en" rows="4" class="w-full px-3 py-2 rounded-lg border border-slate-200 font-mono text-sm"></textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div class="font-black mb-2">Hero subtitle</div>
+              <div class="text-xs text-slate-500 mb-1">Arabic</div>
+              <textarea id="bb-hero-sub-ar" rows="3" class="w-full px-3 py-2 rounded-lg border border-slate-200"></textarea>
+              <div class="text-xs text-slate-500 mb-1 mt-2">English</div>
+              <textarea id="bb-hero-sub-en" rows="3" class="w-full px-3 py-2 rounded-lg border border-slate-200"></textarea>
+            </div>
+            <div>
+              <div class="font-black mb-2">Buttons</div>
+              <div class="text-xs text-slate-500 mb-1">CTA 1 Arabic</div>
+              <input id="bb-hero-cta1-ar" class="w-full px-3 py-2 rounded-lg border border-slate-200" />
+              <div class="text-xs text-slate-500 mb-1 mt-2">CTA 1 English</div>
+              <input id="bb-hero-cta1-en" class="w-full px-3 py-2 rounded-lg border border-slate-200" />
+              <div class="text-xs text-slate-500 mb-1 mt-2">CTA 2 Arabic</div>
+              <input id="bb-hero-cta2-ar" class="w-full px-3 py-2 rounded-lg border border-slate-200" />
+              <div class="text-xs text-slate-500 mb-1 mt-2">CTA 2 English</div>
+              <input id="bb-hero-cta2-en" class="w-full px-3 py-2 rounded-lg border border-slate-200" />
+            </div>
+          </div>
+
+          <div>
+            <div class="font-black mb-2">Hero image</div>
+            <div class="text-xs text-slate-500 mb-2">Upload an image from your PC (admin only). Stored in Supabase Storage bucket: <b>site-assets</b>.</div>
+            <div class="flex flex-col md:flex-row gap-3 md:items-center">
+              <input id="bb-hero-img-file" type="file" accept="image/*" class="block w-full text-sm" />
+              <button id="bb-hero-img-upload" class="px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold hover:bg-slate-50">
+                Upload
+              </button>
+            </div>
+            <div class="text-xs text-slate-500 mt-2">Current URL:</div>
+            <input id="bb-hero-img-url" class="w-full px-3 py-2 rounded-lg border border-slate-200 font-mono text-xs" placeholder="https://..." />
+          </div>
+
+          <div class="border-t border-slate-100 pt-6">
+            <div class="text-xl font-black mb-1">Contact us</div>
+            <div class="text-slate-500 text-sm mb-4">Edit footer contact details shown to customers.</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div class="font-black mb-2">Address</div>
+                <div class="text-xs text-slate-500 mb-1">Arabic</div>
+                <input id="bb-contact-address-ar" class="w-full px-3 py-2 rounded-lg border border-slate-200" placeholder="بغداد، شارع المنصور" />
+                <div class="text-xs text-slate-500 mb-1 mt-2">English</div>
+                <input id="bb-contact-address-en" class="w-full px-3 py-2 rounded-lg border border-slate-200" placeholder="Baghdad, Al-Mansour St." />
+              </div>
+              <div>
+                <div class="font-black mb-2">Phone & Email</div>
+                <div class="text-xs text-slate-500 mb-1">Phone</div>
+                <input id="bb-contact-phone" class="w-full px-3 py-2 rounded-lg border border-slate-200" placeholder="+964 770 000 0000" />
+                <div class="text-xs text-slate-500 mb-1 mt-2">Email</div>
+                <input id="bb-contact-email" class="w-full px-3 py-2 rounded-lg border border-slate-200" placeholder="info@beebbeeb.shop" />
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-100 pt-6">
+            <div class="text-xl font-black mb-1">Help banner (instead of newsletter)</div>
+            <div class="text-slate-500 text-sm mb-4">Shown on home page. Configure Arabic/English + WhatsApp link.</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div class="font-black mb-2">Title</div>
+                <div class="text-xs text-slate-500 mb-1">Arabic</div>
+                <input id="bb-help-title-ar" class="w-full px-3 py-2 rounded-lg border border-slate-200" placeholder="تحتاج مساعدة؟ تواصل معنا" />
+                <div class="text-xs text-slate-500 mb-1 mt-2">English</div>
+                <input id="bb-help-title-en" class="w-full px-3 py-2 rounded-lg border border-slate-200" placeholder="Need help? Contact us" />
+              </div>
+              <div>
+                <div class="font-black mb-2">Subtitle</div>
+                <div class="text-xs text-slate-500 mb-1">Arabic</div>
+                <textarea id="bb-help-sub-ar" rows="3" class="w-full px-3 py-2 rounded-lg border border-slate-200" placeholder="راسلنا على واتساب..."></textarea>
+                <div class="text-xs text-slate-500 mb-1 mt-2">English</div>
+                <textarea id="bb-help-sub-en" rows="3" class="w-full px-3 py-2 rounded-lg border border-slate-200" placeholder="Message us on WhatsApp..."></textarea>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+              <div>
+                <div class="text-xs text-slate-500 mb-1">WhatsApp URL</div>
+                <input id="bb-help-whatsapp" class="w-full px-3 py-2 rounded-lg border border-slate-200 font-mono text-sm" placeholder="https://wa.me/9647xxxxxxxxx" />
+              </div>
+              <div>
+                <div class="text-xs text-slate-500 mb-1">Call phone (tel:)</div>
+                <input id="bb-help-call" class="w-full px-3 py-2 rounded-lg border border-slate-200 font-mono text-sm" placeholder="+9647xxxxxxxxx" />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button id="bb-content-save" class="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-bold">Save</button>
+            <button id="bb-content-reload" class="px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold">Reload</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+

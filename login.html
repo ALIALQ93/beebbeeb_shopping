@@ -21,21 +21,19 @@
 </head>
 <body>
   <h2>تسجيل الدخول</h2>
-  <p>التسجيل يكون برقم الهاتف وكلمة مرور (بدون SMS).</p>
+  <p>أدخل رقم الهاتف وكلمة المرور فقط.</p>
   <div class=card>
     <form id=loginForm>
-      <label for=full_name>الاسم</label>
-      <input id=full_name name=full_name type=text placeholder="مثال: أحمد علي" required>
       <label for=phone>الهاتف</label>
       <input id=phone name=phone type=tel placeholder="07XXXXXXXXX" dir=ltr required>
       <label for=password>كلمة المرور</label>
       <input id=password name=password type=password placeholder=•••••••• required dir=ltr>
       <button type=submit>دخول</button>
-      <button type=button id=signupBtn class=secondary>إنشاء حساب</button>
-      <button type=button id=forgotBtn class=secondary>نسيت كلمة المرور</button>
+      <button type=button id=goSignup class=secondary>إنشاء حساب جديد</button>
+      <button type=button id=goForgot class=secondary>نسيت كلمة المرور</button>
       <div id=loginMsg class=msg></div>
     </form>
-    <p class=note>سيتم التحقق من صحة الرقم شكليًا ومنع تكراره. عند نسيان كلمة المرور سيتم إرسال طلب للإدارة.</p>
+    <p class=note>عند نسيان كلمة المرور سيتم إرسال طلب للإدارة.</p>
   </div>
   <p style=margin-top:16px><a href=home.html>رجوع للرئيسية</a></p>
 </body>

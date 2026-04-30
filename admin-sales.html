@@ -13,20 +13,33 @@
   <body class="bg-slate-50 text-slate-900">
     <div class="flex min-h-screen">
       <aside class="w-64 bg-white border-r border-slate-100 p-4">
-        <div class="font-black text-lg mb-4">Admin</div>
+        <div class="font-black text-lg mb-4" data-i18n-ar="الإدارة" data-i18n-en="Admin">Admin</div>
+        <div class="mb-3">
+          <select
+            class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm"
+            data-bb-lang-select
+          >
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
         <nav class="space-y-2 text-sm">
-          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin.html">Products</a>
-          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="inventory.html">Inventory</a>
-          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-orders.html">Orders</a>
-          <a class="block px-3 py-2 rounded-lg bg-slate-900 text-white" href="admin-sales.html">Sales</a>
-          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-support.html">Support</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin.html" data-i18n-ar="المنتجات" data-i18n-en="Products">Products</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="inventory.html" data-i18n-ar="المخزون" data-i18n-en="Inventory">Inventory</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-orders.html" data-i18n-ar="الطلبات" data-i18n-en="Orders">Orders</a>
+          <a class="block px-3 py-2 rounded-lg bg-slate-900 text-white" href="admin-sales.html" data-i18n-ar="المبيعات" data-i18n-en="Sales">Sales</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-offers.html" data-i18n-ar="العروض" data-i18n-en="Offers">Offers</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-payments.html" data-i18n-ar="الدفع" data-i18n-en="Payments">Payments</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-shipping.html" data-i18n-ar="التوصيل" data-i18n-en="Shipping">Shipping</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-content.html" data-i18n-ar="المحتوى" data-i18n-en="Content">Content</a>
+          <a class="block px-3 py-2 rounded-lg hover:bg-slate-50" href="admin-support.html" data-i18n-ar="الدعم" data-i18n-en="Support">Support</a>
         </nav>
         <div class="mt-6">
           <button
             id="bb-logout"
             class="w-full px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm font-bold"
           >
-            Logout
+            <span data-i18n-ar="تسجيل الخروج" data-i18n-en="Logout">Logout</span>
           </button>
         </div>
       </aside>
@@ -75,19 +88,101 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th class="px-4 py-3">Date</th>
-                <th class="px-4 py-3 text-right">Completed</th>
-                <th class="px-4 py-3 text-right">Pending</th>
-                <th class="px-4 py-3 text-right">Cancelled</th>
-                <th class="px-4 py-3 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody id="bb-sales-rows"></tbody>
-          </table>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-auto">
+            <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <div class="font-black">Pending</div>
+              <div id="bb-sales-count-pending" class="text-xs text-slate-500"></div>
+            </div>
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th class="px-4 py-3">Order</th>
+                  <th class="px-4 py-3">Customer</th>
+                  <th class="px-4 py-3">City</th>
+                  <th class="px-4 py-3 text-right">Total</th>
+                  <th class="px-4 py-3">Created</th>
+                </tr>
+              </thead>
+              <tbody id="bb-sales-rows-pending"></tbody>
+            </table>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-auto">
+            <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <div class="font-black">Confirmed</div>
+              <div id="bb-sales-count-confirmed" class="text-xs text-slate-500"></div>
+            </div>
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th class="px-4 py-3">Order</th>
+                  <th class="px-4 py-3">Customer</th>
+                  <th class="px-4 py-3">City</th>
+                  <th class="px-4 py-3 text-right">Total</th>
+                  <th class="px-4 py-3">Created</th>
+                </tr>
+              </thead>
+              <tbody id="bb-sales-rows-confirmed"></tbody>
+            </table>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-auto">
+            <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <div class="font-black">Delivering</div>
+              <div id="bb-sales-count-delivering" class="text-xs text-slate-500"></div>
+            </div>
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th class="px-4 py-3">Order</th>
+                  <th class="px-4 py-3">Customer</th>
+                  <th class="px-4 py-3">City</th>
+                  <th class="px-4 py-3 text-right">Total</th>
+                  <th class="px-4 py-3">Created</th>
+                </tr>
+              </thead>
+              <tbody id="bb-sales-rows-delivering"></tbody>
+            </table>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-auto">
+            <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <div class="font-black">Completed</div>
+              <div id="bb-sales-count-completed" class="text-xs text-slate-500"></div>
+            </div>
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th class="px-4 py-3">Order</th>
+                  <th class="px-4 py-3">Customer</th>
+                  <th class="px-4 py-3">City</th>
+                  <th class="px-4 py-3 text-right">Total</th>
+                  <th class="px-4 py-3">Created</th>
+                </tr>
+              </thead>
+              <tbody id="bb-sales-rows-completed"></tbody>
+            </table>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-auto xl:col-span-2">
+            <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <div class="font-black">Cancelled</div>
+              <div id="bb-sales-count-cancelled" class="text-xs text-slate-500"></div>
+            </div>
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th class="px-4 py-3">Order</th>
+                  <th class="px-4 py-3">Customer</th>
+                  <th class="px-4 py-3">City</th>
+                  <th class="px-4 py-3 text-right">Total</th>
+                  <th class="px-4 py-3">Created</th>
+                </tr>
+              </thead>
+              <tbody id="bb-sales-rows-cancelled"></tbody>
+            </table>
+          </div>
         </div>
       </main>
     </div>

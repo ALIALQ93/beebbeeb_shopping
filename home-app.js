@@ -1,6 +1,7 @@
 // Home page: fetch active products from Supabase and render into "New Arrivals".
 (function () {
   var __usdRate = null;
+  var AGE_CHOICES = ["0-3M","3-6M","6-12M","12-18M","18-24M","2-3Y","3-4Y","4-5Y","5-6Y","6-7Y","7-8Y","8-12Y"];
 
   function fmtIQD(n) {
     try {
@@ -70,16 +71,22 @@
 
   function addToCart(product) {
     var colors = Array.isArray(product.colors) ? product.colors.filter(Boolean) : [];
-    // If product has multiple colors, force user to pick from product page
-    if (colors.length > 1) {
+    var ages = Array.isArray(product.age_ranges) ? product.age_ranges.filter(Boolean) : [];
+    // If product has multiple variants, force user to pick on product page
+    if (colors.length > 1 || ages.length > 1) {
       location.href = "product.html?id=" + encodeURIComponent(product.id);
       return;
     }
     var chosenColor = colors.length === 1 ? colors[0] : null;
+    var chosenAge = ages.length === 1 ? ages[0] : null;
 
     var cart = getCart();
     var existing = cart.find(function (x) {
-      return x.product_id === product.id && (x.color || null) === chosenColor;
+      return (
+        x.product_id === product.id &&
+        (x.color || null) === (chosenColor || null) &&
+        (x.age_range || null) === (chosenAge || null)
+      );
     });
     var maxStock = Number(product.stock);
     if (existing) {
@@ -91,6 +98,7 @@
         product_id: product.id,
         title: product.title,
         color: chosenColor,
+        age_range: chosenAge,
         base_price_iqd: product.price_iqd,
         discount_percent: Number(product.discount_percent || 0),
         price_iqd: Number(product.final_price_iqd || product.price_iqd),
@@ -138,6 +146,8 @@
 
     var usd = fmtUSDFromIQD(priceNow, p.__usdRate);
     var titleEn = (p.title_en || "").trim();
+    var lang = (window.BB && window.BB.getLang) ? window.BB.getLang() : "ar";
+    var addTxt = lang === "en" ? "Add to cart" : "إضافة للسلة";
     return (
       '<div class="bg-white rounded-[2rem] p-3 border border-teal-50 puffy-shadow group">' +
       '<a href="' +
@@ -166,7 +176,9 @@
         : "") +
       '<button data-bb-add-to-cart="' +
       escapeHtml(p.id) +
-      '" class="w-full mt-3 py-2 bg-secondary-container text-on-secondary-container rounded-xl text-xs font-bold hover:bg-secondary transition-colors">إضافة للسلة</button>' +
+      '" class="w-full mt-3 py-2 bg-secondary-container text-on-secondary-container rounded-xl text-xs font-bold hover:bg-secondary transition-colors">' +
+      escapeHtml(addTxt) +
+      "</button>" +
       "</div>"
     );
   }
@@ -194,6 +206,8 @@
 
     var usd = fmtUSDFromIQD(priceNow, p.__usdRate);
     var titleEn = (p.title_en || "").trim();
+    var lang = (window.BB && window.BB.getLang) ? window.BB.getLang() : "ar";
+    var addTxt = lang === "en" ? "Add to cart" : "إضافة للسلة";
     return (
       '<div class="md:col-span-2 md:row-span-2 bg-white rounded-[2rem] p-4 border border-teal-50 puffy-shadow flex flex-col">' +
       '<a href="' +
@@ -227,7 +241,9 @@
         : "") +
       '<button data-bb-add-to-cart="' +
       escapeHtml(p.id) +
-      '" class="w-full mt-3 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:opacity-90 transition-colors">إضافة للسلة</button>' +
+      '" class="w-full mt-3 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:opacity-90 transition-colors">' +
+      escapeHtml(addTxt) +
+      "</button>" +
       "</div>" +
       "</div>"
     );
@@ -250,7 +266,7 @@
 
     var res = await sb
       .from("products")
-      .select("id,title,title_en,price_iqd,discount_percent,stock,colors,image_url,active,created_at")
+      .select("id,title,title_en,price_iqd,discount_percent,stock,colors,age_ranges,image_url,active,created_at")
       .eq("active", true)
       .order("created_at", { ascending: false })
       .limit(9);
@@ -258,7 +274,7 @@
       // Fallback if created_at isn't available/selectable
       res = await sb
         .from("products")
-        .select("id,title,title_en,price_iqd,discount_percent,stock,colors,image_url,active")
+        .select("id,title,title_en,price_iqd,discount_percent,stock,colors,age_ranges,image_url,active")
         .eq("active", true)
         .order("id", { ascending: false })
         .limit(9);
@@ -274,6 +290,80 @@
 
     var products = res.data || [];
     var rate = await getUsdRate(sb);
+
+    // Customer session pill
+    try {
+      if (window.BB && window.BB.getCustomer) {
+        var me = await window.BB.getCustomer();
+        var pill = document.getElementById("bb-customer-pill");
+        var logoutBtn = document.getElementById("bb-customer-logout");
+        if (me && me.full_name) {
+          if (pill) {
+            pill.textContent = me.full_name;
+            pill.href = "my-orders.html";
+            pill.classList.remove("hidden");
+          }
+          if (logoutBtn) logoutBtn.classList.remove("hidden");
+        } else {
+          if (pill) pill.classList.remove("hidden");
+        }
+        if (logoutBtn) {
+          try {
+            if (window.BB && window.BB.applyLang) window.BB.applyLang();
+          } catch (e00) {}
+          logoutBtn.addEventListener("click", function () {
+            if (window.BB && window.BB.customerLogout) window.BB.customerLogout();
+            location.reload();
+          });
+        }
+      }
+    } catch (e0) {}
+
+    // Age filter (exact options like product card)
+    var ageFilter = "";
+    try {
+      ageFilter = (new URL(location.href).searchParams.get("age") || "").trim();
+    } catch (e1) {}
+
+    // Render age filter buttons
+    try {
+      var host = document.getElementById("bb-age-filter");
+      var clear = document.getElementById("bb-age-clear");
+      if (host) {
+        var lang = (window.BB && window.BB.getLang) ? window.BB.getLang() : "ar";
+        var allTxt = lang === "en" ? "All" : "الكل";
+        host.innerHTML =
+          '<a href="home.html#bb-new-arrivals" class="px-4 py-2 rounded-full border-2 ' +
+          (!ageFilter ? "border-primary bg-primary text-white" : "border-outline-variant hover:border-primary-container text-on-surface-variant") +
+          ' font-bold text-sm transition-all">' + allTxt + "</a>" +
+          AGE_CHOICES.map(function (a) {
+            var active = ageFilter === a;
+            return (
+              '<a href="home.html?age=' +
+              encodeURIComponent(a) +
+              '#bb-new-arrivals" class="px-4 py-2 rounded-full border-2 ' +
+              (active
+                ? "border-primary bg-primary text-white"
+                : "border-outline-variant hover:border-primary-container text-on-surface-variant") +
+              ' font-bold text-sm transition-all" dir="ltr">' +
+              a +
+              "</a>"
+            );
+          }).join("");
+      }
+      if (clear) {
+        if (ageFilter) clear.classList.remove("hidden");
+        else clear.classList.add("hidden");
+      }
+    } catch (e2) {}
+
+    function matchesAge(p) {
+      if (!ageFilter) return true;
+      var ages = Array.isArray(p.age_ranges) ? p.age_ranges : [];
+      if (!ages.length) return true;
+      return ages.indexOf(ageFilter) !== -1;
+    }
+    products = products.filter(matchesAge);
     if (products.length === 0) {
       grid.innerHTML =
         '<div class="bg-white rounded-[2rem] p-6 border border-teal-50 puffy-shadow text-center text-on-surface-variant">لا توجد منتجات بعد. أضف منتجات من صفحة Admin.</div>';

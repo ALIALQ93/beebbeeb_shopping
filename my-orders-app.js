@@ -1,4 +1,4 @@
-// Customer: list own orders (RLS should allow user_id = auth.uid()).
+// Customer: list own orders via RPC + custom session token.
 (function () {
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -25,29 +25,40 @@
   async function boot() {
     if (!window.BB || !window.BB.getSupabase) return;
     var sb = await window.BB.getSupabase();
-    var u = await sb.auth.getUser();
-    if (!u.data || !u.data.user) return;
+    var tok = "";
+    try {
+      tok = localStorage.getItem("bb_customer_token") || "";
+    } catch (e0) {}
+    if (!tok) return;
+
+    // Customer session pill
+    try {
+      if (window.BB && window.BB.getCustomer) {
+        var me0 = await window.BB.getCustomer();
+        var pill = document.getElementById("bb-customer-pill");
+        var logoutBtn = document.getElementById("bb-customer-logout");
+        if (me0 && me0.full_name) {
+          if (pill) {
+            pill.textContent = me0.full_name;
+            pill.href = "my-orders.html";
+          }
+          if (logoutBtn) logoutBtn.classList.remove("hidden");
+        }
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", function () {
+            if (window.BB && window.BB.customerLogout) window.BB.customerLogout();
+            location.href = "home.html";
+          });
+        }
+      }
+    } catch (e0) {}
 
     var tbody = document.getElementById("bb-my-order-rows");
     var msg = document.getElementById("bb-my-orders-msg");
     if (!tbody) return;
 
     if (msg) msg.textContent = "";
-    var res = await sb
-      .from("orders")
-      .select("id,status,total,shipping_name,created_at")
-      .eq("user_id", u.data.user.id)
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    if (res.error) {
-      res = await sb
-        .from("orders")
-        .select("id,status,total,shipping_name")
-        .eq("user_id", u.data.user.id)
-        .order("id", { ascending: false })
-        .limit(50);
-    }
+    var res = await sb.rpc("customer_list_orders", { p_token: tok });
 
     if (res.error) {
       if (msg) msg.textContent = res.error.message;
@@ -76,15 +87,14 @@
         "</td>" +
         '<td class="px-4 py-3 text-sm text-slate-500">' +
         escapeHtml(when) +
-        "</td>" +
-        '<td class="px-4 py-3"><a class="text-teal-600 font-bold underline" href="tracking.html">تتبع</a></td>';
+        "</td>";
       tbody.appendChild(tr);
     });
 
     if (!(res.data || []).length) {
       var empty = document.createElement("tr");
       empty.innerHTML =
-        '<td class="px-4 py-8 text-center text-slate-500" colspan="6">لا توجد طلبات بعد. <a class="text-teal-600 underline font-bold" href="home.html">تسوق الآن</a></td>';
+        '<td class="px-4 py-8 text-center text-slate-500" colspan="5">لا توجد طلبات بعد. <a class="text-teal-600 underline font-bold" href="home.html">تسوق الآن</a></td>';
       tbody.appendChild(empty);
     }
   }

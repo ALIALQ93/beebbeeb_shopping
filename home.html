@@ -3,7 +3,7 @@
 <html dir="rtl" lang="ar"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts removed to avoid MIME errors on restricted networks -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -95,7 +95,7 @@
             },
         }
     </script>
-    <script src="home-app.js" defer></script>
+    <!-- Load Supabase/auth BEFORE page apps (defer preserves order) -->
 <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fff8f7; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
@@ -104,6 +104,8 @@
     </style>
   <script src="supabase-config.js"></script>
   <script src="auth.js" defer></script>
+  <script src="home-app.js" defer></script>
+  <script src="home-content.js" defer></script>
 </head>
 <body class="bg-background text-on-background">
 <!-- TopAppBar -->
@@ -112,18 +114,27 @@
 <div class="flex items-center gap-8">
 <a class="text-2xl font-black text-teal-500 dark:text-teal-400 tracking-tight" href="home.html">BeebBeeb Shopping</a>
 <nav class="hidden md:flex items-center gap-6">
-<a class="text-teal-600 dark:text-teal-300 font-bold border-b-2 border-teal-400 font-body-base text-body-base py-1" href="home.html">الرئيسية</a>
-<a class="text-gray-500 dark:text-gray-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors duration-300 rounded-lg px-3 py-1 font-body-base text-body-base" href="home.html#bb-new-arrivals">المتجر</a>
-<a class="text-gray-500 dark:text-gray-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors duration-300 rounded-lg px-3 py-1 font-body-base text-body-base" href="home.html#bb-new-arrivals">العروض</a>
+<a data-i18n-ar="الرئيسية" data-i18n-en="Home" class="text-teal-600 dark:text-teal-300 font-bold border-b-2 border-teal-400 font-body-base text-body-base py-1" href="home.html">الرئيسية</a>
+<a data-i18n-ar="المتجر" data-i18n-en="Shop" class="text-gray-500 dark:text-gray-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors duration-300 rounded-lg px-3 py-1 font-body-base text-body-base" href="home.html#bb-new-arrivals">المتجر</a>
+<a data-i18n-ar="العروض" data-i18n-en="Offers" class="text-gray-500 dark:text-gray-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors duration-300 rounded-lg px-3 py-1 font-body-base text-body-base" href="home.html#bb-new-arrivals">العروض</a>
+<a data-i18n-ar="طلباتي" data-i18n-en="My orders" class="text-gray-500 dark:text-gray-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors duration-300 rounded-lg px-3 py-1 font-body-base text-body-base" href="my-orders.html">طلباتي</a>
 </nav>
 </div>
 <div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-surface-container-low rounded-full px-4 py-2 border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline text-lg">language</span>
+<select data-bb-lang-select class="bg-transparent border-none focus:ring-0 text-sm font-semibold mr-2">
+<option value="ar">العربية (العراق)</option>
+<option value="en">English (US)</option>
+</select>
+</div>
 <div class="hidden lg:flex items-center bg-surface-container rounded-full px-4 py-1.5 inner-squish">
 <span class="material-symbols-outlined text-outline text-[20px] ml-2" data-icon="search">search</span>
 <input class="bg-transparent border-none focus:ring-0 text-sm font-body-base w-48" placeholder="بحث عن منتجات..." type="text"/>
 </div>
 <div class="flex items-center gap-1">
-<a href="login.html" class="hidden sm:inline px-3 py-1.5 text-sm font-bold text-teal-600 hover:bg-teal-50 rounded-full">دخول</a>
+<a id="bb-customer-pill" href="login.html" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-teal-600 hover:bg-teal-50 rounded-full">دخول</a>
+<button id="bb-customer-logout" type="button" data-i18n-ar="خروج" data-i18n-en="Logout" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-slate-600 hover:bg-teal-50 rounded-full">خروج</button>
 <button class="p-2 text-teal-500 hover:bg-teal-50 rounded-full transition-all scale-95 active:scale-90">
 <span class="material-symbols-outlined" data-icon="language">language</span>
 </button>
@@ -141,68 +152,36 @@
 </header>
 <main class="max-w-7xl mx-auto px-4 md:px-8 py-8">
 <!-- Hero Section -->
-<section class="relative rounded-[2.5rem] overflow-hidden bg-primary-container/20 mb-xl min-h-[500px] flex items-center">
+<section id="bb-hero" class="relative rounded-[2.5rem] overflow-hidden bg-primary-container/20 mb-xl min-h-[500px] flex items-center">
 <div class="absolute inset-0 z-0">
-<img alt="Happy kids playing" class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="Group of diverse toddlers laughing and playing in a brightly lit, soft-toned nursery, wearing colorful organic cotton clothing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQblEjrU50IT0LQNeIfcOZnED2xS52TVamgWdb9cYq0nxKipecnC8qePqadj6_xQG-3wsfhDmI0JWR3tl3knK_eKo18WQQWo45p6oIbBanpKI6mw8D5x8F-2y-thvodKMZH9CrGxNmbUHuJGN7faYzF7wblfu7bVUFrTmHY0SmUiIp5XjJqbHu7SP9HwRRNhqcHVzeZmY0BqxgTFDjkwBJ75OFr4UQiX7LVPL5TtsQzl94XFaidzNqCPbAxLBN7xc3VusVtUodKGI"/>
+<img id="bb-hero-img" alt="Hero" class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="Group of diverse toddlers laughing and playing in a brightly lit, soft-toned nursery, wearing colorful organic cotton clothing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQblEjrU50IT0LQNeIfcOZnED2xS52TVamgWdb9cYq0nxKipecnC8qePqadj6_xQG-3wsfhDmI0JWR3tl3knK_eKo18WQQWo45p6oIbBanpKI6mw8D5x8F-2y-thvodKMZH9CrGxNmbUHuJGN7faYzF7wblfu7bVUFrTmHY0SmUiIp5XjJqbHu7SP9HwRRNhqcHVzeZmY0BqxgTFDjkwBJ75OFr4UQiX7LVPL5TtsQzl94XFaidzNqCPbAxLBN7xc3VusVtUodKGI"/>
 <div class="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent"></div>
 </div>
 <div class="relative z-10 w-full md:w-1/2 px-8 lg:px-16 text-right">
-<span class="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full font-label-caps text-label-caps mb-4">تشكيلة الربيع وصلت</span>
-<h1 class="font-display-lg text-display-lg text-on-surface mb-6 leading-tight">نعومة فائقة لراحة <br/><span class="text-primary">صغاركم المفضلة</span></h1>
-<p class="font-body-base text-body-base text-on-surface-variant mb-8 max-w-md">اكتشفوا مجموعتنا الجديدة من الملابس القطنية العضوية، المصممة بكل حب لتناسب بشرة طفلك الحساسة.</p>
+<span id="bb-hero-badge" data-i18n-ar="تشكيلة الربيع وصلت" data-i18n-en="Spring collection is here" class="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full font-label-caps text-label-caps mb-4">تشكيلة الربيع وصلت</span>
+<h1 id="bb-hero-title" data-i18n-html-ar="نعومة فائقة لراحة <br/><span class=&quot;text-primary&quot;>صغاركم المفضلة</span>" data-i18n-html-en="Ultra softness for your little ones’ comfort" class="font-display-lg text-display-lg text-on-surface mb-6 leading-tight">نعومة فائقة لراحة <br/><span class="text-primary">صغاركم المفضلة</span></h1>
+<p id="bb-hero-subtitle" data-i18n-ar="اكتشفوا مجموعتنا الجديدة من الملابس القطنية العضوية، المصممة بكل حب لتناسب بشرة طفلك الحساسة." data-i18n-en="Discover our new organic cotton collection, crafted with love for sensitive baby skin." class="font-body-base text-body-base text-on-surface-variant mb-8 max-w-md">اكتشفوا مجموعتنا الجديدة من الملابس القطنية العضوية، المصممة بكل حب لتناسب بشرة طفلك الحساسة.</p>
 <div class="flex gap-4">
-<a href="home.html#bb-new-arrivals" class="bg-primary text-white px-8 py-4 rounded-xl font-headline-md text-headline-md puffy-shadow hover:scale-105 transition-transform inline-block">تسوق الآن</a>
-<a href="home.html#bb-new-arrivals" class="bg-white border-2 border-primary-container text-primary px-8 py-4 rounded-xl font-headline-md text-headline-md hover:bg-primary-container/10 transition-colors inline-block">عرض العروض</a>
+<a id="bb-hero-cta1" data-i18n-ar="تسوق الآن" data-i18n-en="Shop now" href="home.html#bb-new-arrivals" class="bg-primary text-white px-8 py-4 rounded-xl font-headline-md text-headline-md puffy-shadow hover:scale-105 transition-transform inline-block">تسوق الآن</a>
+<a id="bb-hero-cta2" data-i18n-ar="عرض العروض" data-i18n-en="View offers" href="home.html#bb-new-arrivals" class="bg-white border-2 border-primary-container text-primary px-8 py-4 rounded-xl font-headline-md text-headline-md hover:bg-primary-container/10 transition-colors inline-block">عرض العروض</a>
 </div>
 </div>
 </section>
-<!-- Shop by Age (Asymmetric Grid) -->
+<!-- Shop by Age (exact product options) -->
 <section class="mb-xl">
-<div class="flex items-end justify-between mb-8">
-<div>
-<h2 class="font-display-lg text-headline-md text-on-surface mb-2">تسوق حسب العمر</h2>
-<p class="font-body-base text-body-base text-on-surface-variant">اختر المقاس المثالي لمرحلة نمو طفلك</p>
-</div>
-</div>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-<!-- Age Card 1 -->
-<div class="group relative aspect-square rounded-[2rem] overflow-hidden puffy-shadow cursor-pointer">
-<img alt="Infant" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Soft close-up of a sleeping newborn in a white onesie, warm soft lighting, cream background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9jAPZfQ2fkmdH2hYnhYxpyzugxcfA2wC_sSkjQRzne-SFzjfLNmXbqHAAaC4o2YcqWOCc09UHIaMk6F2jWKQRAVfmjZO5fdqToyfxaMOAqZiNiSVKXKveewafjKOtT73sOseyPmcdQFIq4P8sfp7qA7oTeJoBWEo5qBVfsD349zOWdEpxqVv6G3-AGJ716AYDN7QDkfbaHJt58IJXA2zdiEwKCe5iFWT-6izQJS3sGU8RL4bZEWvNuORNTUyyeeehaWaN2xXJ4T0"/>
-<div class="absolute inset-0 bg-gradient-to-t from-teal-900/60 to-transparent flex flex-col justify-end p-6">
-<p class="text-white font-bold text-xl">0-2 سنة</p>
-<p class="text-teal-50/80 text-sm">حديثي الولادة</p>
-</div>
-</div>
-<!-- Age Card 2 -->
-<div class="group relative aspect-square rounded-[2rem] overflow-hidden puffy-shadow cursor-pointer md:mt-8">
-<img alt="Toddler" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Young toddler running in a meadow, wearing a blue linen shirt, golden hour natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXidsAXBJdxV0uk6BcQXf0U3q2SpCf-AF82Y56aCp4UL4BNecgbhJeW6suqgBIjbWKgQGnen9vT5lOhzsXln14VhrvBFL-GjgzmggW8ONsQsoPIDcXmKMPrdkOHjMQ7lphHZMaXX_T8HbX9LtWb9a3uB6NAwwOs1mC1vUDPoas8BfX2F3bZxrzyNzHU2Hk1BuyFxYuQ79FK8Hm3BPO1WbreLy4Ws0bqmSnQ_KXT_KciNf8oW9fXThQANbSc970A38leXyaVRunPCM"/>
-<div class="absolute inset-0 bg-gradient-to-t from-teal-900/60 to-transparent flex flex-col justify-end p-6">
-<p class="text-white font-bold text-xl">2-5 سنوات</p>
-<p class="text-teal-50/80 text-sm">المستكشفون الصغار</p>
-</div>
-</div>
-<!-- Age Card 3 -->
-<div class="group relative aspect-square rounded-[2rem] overflow-hidden puffy-shadow cursor-pointer">
-<img alt="Child" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Primary school age girl in a stylish floral dress standing against a pastel pink wall" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3eq-_oPmTgPdf_G-aXxsML_snbKaKjWWm1fL_uMbBko7vlRscf_S8kED4Fat7RiC-H85OFkhI5-1PjMCfzHbEwGNT9jDJjZVyGWvgQGk1HVmjZ2EZkBPpjv8bRLlKTF1aXKwCixV9BWJMpn0SfldxHc6LFvmJKTyKFvT5TrmtEBGzdD2wU08_hZTEAvKAoQnb4j99DwgiIb5x_bQoE7MWIciUQo0iITr_N6CHHk4DkCDLy15hf7fjybQEqsy6Eep15AQYEWRIW-o"/>
-<div class="absolute inset-0 bg-gradient-to-t from-teal-900/60 to-transparent flex flex-col justify-end p-6">
-<p class="text-white font-bold text-xl">5-8 سنوات</p>
-<p class="text-teal-50/80 text-sm">مغامرة مدرسية</p>
-</div>
-</div>
-<!-- Age Card 4 -->
-<div class="group relative aspect-square rounded-[2rem] overflow-hidden puffy-shadow cursor-pointer md:mt-8">
-<img alt="Pre-teen" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Two kids wearing trendy denim and backpacks, urban park setting, bright daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCev55Ctxi_lLEj4I-lodt4DHsdl5793tF2DJRItsb7Z9lNZoKpQhsncvBWDUADrTLNiYVK0YsVW9NsRHK_jgzoPhrKmpXb3_84Ns30zjKVDRp1zqdH2IGUnRVyPWXcb5rwbh7UvLuvnjdpZYOLBkMm8LUc4Lv19uIWEFZW3T2YrfCdFjdQXgx5MbtJLmrJUOFlbKH-9HuRCyzGDU_XvJrBGGGKHWlYf9rcsQs8v-PUnqvy6XEJ0c9o8-XUo5pV7_uU8D3hIKjc_R0"/>
-<div class="absolute inset-0 bg-gradient-to-t from-teal-900/60 to-transparent flex flex-col justify-end p-6">
-<p class="text-white font-bold text-xl">8-12 سنة</p>
-<p class="text-teal-50/80 text-sm">أناقة اليافعين</p>
-</div>
-</div>
-</div>
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <h2 data-i18n-ar="تسوق حسب العمر" data-i18n-en="Shop by age" class="font-display-lg text-headline-md text-on-surface mb-2">تسوق حسب العمر</h2>
+      <p data-i18n-ar="نفس خيارات المقاسات الموجودة داخل بطاقة المنتج" data-i18n-en="Same size options shown on product cards" class="font-body-base text-body-base text-on-surface-variant">نفس خيارات المقاسات الموجودة داخل بطاقة المنتج</p>
+    </div>
+    <a id="bb-age-clear" href="home.html#bb-new-arrivals" class="text-sm font-bold text-teal-600 hover:underline hidden">إزالة الفلتر</a>
+  </div>
+  <div id="bb-age-filter" class="flex flex-wrap gap-2"></div>
 </section>
 <!-- New Arrivals (Bento Grid Style) -->
 <section class="mb-xl">
 <div class="text-center mb-12">
-<h2 class="font-display-lg text-display-lg text-on-surface mb-2">وصل حديثاً</h2>
+<h2 data-i18n-ar="وصل حديثاً" data-i18n-en="New arrivals" class="font-display-lg text-display-lg text-on-surface mb-2">وصل حديثاً</h2>
 <div class="w-24 h-1.5 bg-primary-container mx-auto rounded-full"></div>
 </div>
 <div id="bb-new-arrivals" class="scroll-mt-24 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -214,15 +193,15 @@
 <!-- Playful Banner -->
 <section class="bg-tertiary-fixed rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 mb-xl">
 <div class="flex-1 text-center md:text-right">
-<h3 class="font-display-lg text-headline-md text-on-tertiary-container mb-4">انضم لعائلة بيب بيب!</h3>
-<p class="text-on-tertiary-container/80 mb-6 font-body-base">اشترك في نشرتنا البريدية واحصل على خصم 15% على طلبك الأول من الملابس الجديدة.</p>
+<h3 id="bb-help-title" data-i18n-ar="تحتاج مساعدة؟ تواصل معنا" data-i18n-en="Need help? Contact us" class="font-display-lg text-headline-md text-on-tertiary-container mb-4">تحتاج مساعدة؟ تواصل معنا</h3>
+<p id="bb-help-sub" data-i18n-ar="راسلنا على واتساب لمساعدتك في اختيار المقاس وتتبع الطلبات." data-i18n-en="Message us on WhatsApp for sizing help and order support." class="text-on-tertiary-container/80 mb-6 font-body-base">راسلنا على واتساب لمساعدتك في اختيار المقاس وتتبع الطلبات.</p>
 <div class="flex flex-col sm:flex-row gap-3 max-w-md ml-auto">
-<input class="flex-1 rounded-xl border-none bg-white/50 focus:ring-2 focus:ring-primary px-4 py-3" placeholder="بريدك الإلكتروني" type="email"/>
-<button class="bg-primary text-white px-8 py-3 rounded-xl font-bold puffy-shadow">اشترك الآن</button>
+<a id="bb-help-cta" data-i18n-ar="واتساب الآن" data-i18n-en="WhatsApp now" href="https://wa.me/9647700000000" target="_blank" class="bg-primary text-white px-8 py-3 rounded-xl font-bold puffy-shadow text-center hover:opacity-90 transition">واتساب الآن</a>
+<a id="bb-help-call" data-i18n-ar="اتصال" data-i18n-en="Call" href="tel:+9647700000000" class="bg-white border-2 border-primary-container text-primary px-8 py-3 rounded-xl font-bold puffy-shadow text-center hover:bg-primary-container/10 transition">اتصال</a>
 </div>
 </div>
 <div class="w-48 h-48 bg-white/30 rounded-full flex items-center justify-center">
-<span class="material-symbols-outlined text-6xl text-primary" data-icon="child_care">child_care</span>
+<span class="material-symbols-outlined text-6xl text-primary" data-icon="support_agent">support_agent</span>
 </div>
 </section>
 </main>
@@ -242,16 +221,21 @@
 <h4 class="font-bold text-teal-500 mb-4">روابط سريعة</h4>
 <ul class="space-y-2">
 <li><a class="text-gray-600 dark:text-gray-400 text-sm hover:text-teal-400 underline decoration-2 transition-all" href="checkout.html">الشحن والإرجاع</a></li>
-<li><a class="text-gray-600 dark:text-gray-400 text-sm hover:text-teal-400 underline decoration-2 transition-all" href="tracking.html">تتبع طلبك</a></li>
 <li><a class="text-gray-600 dark:text-gray-400 text-sm hover:text-teal-400 underline decoration-2 transition-all" href="my-orders.html">طلباتي</a></li>
 <li><a class="text-gray-600 dark:text-gray-400 text-sm hover:text-teal-400 underline decoration-2 transition-all" href="login.html">تسجيل الدخول</a></li>
 </ul>
 </div>
 <div>
-<h4 class="font-bold text-teal-500 mb-4">تواصل معنا</h4>
-<p class="text-gray-600 text-sm mb-2">بغداد، شارع المنصور</p>
-<p class="text-gray-600 text-sm mb-2">هاتف: +964 770 000 0000</p>
-<p class="text-gray-600 text-sm">البريد: info@beebbeeb.shop</p>
+<h4 data-i18n-ar="تواصل معنا" data-i18n-en="Contact us" class="font-bold text-teal-500 mb-4">تواصل معنا</h4>
+<p id="bb-contact-address" data-i18n-ar="بغداد، شارع المنصور" data-i18n-en="Baghdad, Al-Mansour St." class="text-gray-600 text-sm mb-2">بغداد، شارع المنصور</p>
+<p class="text-gray-600 text-sm mb-2">
+  <span data-i18n-ar="هاتف:" data-i18n-en="Phone:">هاتف:</span>
+  <a id="bb-contact-phone" class="underline decoration-2 hover:text-teal-500" dir="ltr" href="tel:+9647700000000">+964 770 000 0000</a>
+</p>
+<p class="text-gray-600 text-sm">
+  <span data-i18n-ar="البريد:" data-i18n-en="Email:">البريد:</span>
+  <a id="bb-contact-email" class="underline decoration-2 hover:text-teal-500" dir="ltr" href="mailto:info@beebbeeb.shop">info@beebbeeb.shop</a>
+</p>
 </div>
 <div>
 <h4 class="font-bold text-teal-500 mb-4">طرق الدفع</h4>
@@ -263,7 +247,12 @@
 </div>
 </div>
 <div class="border-t border-teal-50 py-6 text-center">
-<p class="text-gray-400 text-xs font-body-base">© 2024 BeebBeeb Shopping. All rights reserved.</p>
+<p class="text-gray-400 text-xs font-body-base"
+   data-i18n-ar="© 2024 BeebBeeb Shopping. جميع الحقوق محفوظة."
+   data-i18n-en="© 2024 BeebBeeb Shopping. All rights reserved.">© 2024 BeebBeeb Shopping. All rights reserved.</p>
+<p class="text-gray-400 text-[11px] font-body-base mt-1"
+   data-i18n-ar="إعداد ونشر الموقع - روزميري للحلول البرمجية - +9647838816898"
+   data-i18n-en="Site setup & publishing — Rosemary Software Solutions — +9647838816898">إعداد ونشر الموقع - روزميري للحلول البرمجية - +9647838816898</p>
 </div>
 </footer>
 <!-- FAB for Quick Support (Mobile/Desktop) -->

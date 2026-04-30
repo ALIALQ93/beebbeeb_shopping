@@ -63,6 +63,19 @@
     var host = document.createElement("div");
     host.style.cssText = "max-width:1100px;margin:0 auto;padding:0 0 12px;";
     host.innerHTML =
+      "<style>" +
+      "@media (max-width: 980px) {" +
+      "  #bbProdForm{grid-template-columns:1fr 1fr !important;}" +
+      "  #bbProdForm textarea,#bbProdForm input[id='bb-prod-image'],#bbProdForm input[id='bb-prod-file']{grid-column:1 / span 2 !important;}" +
+      "}" +
+      "@media (max-width: 640px) {" +
+      "  #bb-prod-modal{padding:10px !important; align-items:stretch !important;}" +
+      "  #bb-prod-modal > div{max-width:100% !important;}" +
+      "  #bbProdForm{grid-template-columns:1fr !important;}" +
+      "  #bbProdForm textarea,#bbProdForm input[id='bb-prod-image'],#bbProdForm input[id='bb-prod-file']{grid-column:1 / span 1 !important;}" +
+      "  #bb-prod-modal-body{max-height:calc(100vh - 90px) !important; overflow:auto !important;}" +
+      "}" +
+      "</style>" +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">' +
       '<h2 style="font-weight:900;margin:0">المنتجات</h2>' +
       '<div style="display:flex;gap:10px;align-items:center">' +
@@ -81,6 +94,7 @@
       '<div style="background:#fff;border:1px solid #e8e1e1;border-radius:14px;overflow:auto">' +
       '<table style="width:100%;border-collapse:collapse">' +
       '<thead><tr style="background:#f3ecec">' +
+      '<th style="text-align:left;padding:10px">Image</th>' +
       '<th style="text-align:left;padding:10px">Title</th>' +
       '<th style="text-align:right;padding:10px">IQD</th>' +
       '<th style="text-align:right;padding:10px">USD</th>' +
@@ -96,7 +110,7 @@
       '<div style="font-weight:900" id="bb-modal-title">إضافة منتج</div>' +
       '<button id="bb-modal-close" type="button" style="background:#eee;border:0;border-radius:10px;padding:8px 10px;font-weight:900;cursor:pointer">✕</button>' +
       "</div>" +
-      '<div style="padding:12px 14px">' +
+      '<div id="bb-prod-modal-body" style="padding:12px 14px;max-height:calc(100vh - 140px);overflow:auto">' +
       '<form id="bbProdForm" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;align-items:start">' +
       '<input id="bb-prod-title" name="title" placeholder="العنوان" style="padding:10px 12px;border:1px solid #bec9c5;border-radius:10px" required>' +
       '<input id="bb-prod-title-en" name="title_en" placeholder="English name (اختياري)" style="padding:10px 12px;border:1px solid #bec9c5;border-radius:10px" dir="ltr">' +
@@ -174,7 +188,7 @@
     var editId = null;
     var submitBtn = null;
     var usdRate = null;
-    var origColorStock = {}; // used in edit mode to apply deltas only
+    var origVariantStock = {}; // key: color||age -> stock (used in edit mode)
 
     function setEditMode(id) {
       editId = id || null;
@@ -285,14 +299,14 @@
       setMsg("");
       var res = await sb
         .from("products")
-        .select("id,title,price_iqd,discount_percent,stock,active,created_at")
+        .select("id,title,image_url,price_iqd,discount_percent,stock,active,created_at")
         .order("created_at", { ascending: false })
         .limit(50);
       if (res.error) {
         // Fallback if created_at isn't available/selectable
         res = await sb
           .from("products")
-          .select("id,title,price_iqd,discount_percent,stock,active")
+          .select("id,title,image_url,price_iqd,discount_percent,stock,active")
           .order("id", { ascending: false })
           .limit(50);
       }
@@ -302,18 +316,19 @@
       }
 
       var products = res.data || [];
-      // Fetch per-color stock for these products
+      // Fetch variant stock for these products
       var ids = products.map(function (p) { return p.id; }).filter(Boolean);
       var stockMap = {};
       if (ids.length) {
         var vs = await sb
-          .from("product_color_stock")
-          .select("product_id,color,stock")
+          .from("product_variant_stock")
+          .select("product_id,color,age_range,stock")
           .in("product_id", ids);
         if (!vs.error) {
           (vs.data || []).forEach(function (r) {
             stockMap[r.product_id] = stockMap[r.product_id] || {};
-            stockMap[r.product_id][r.color] = Number(r.stock || 0);
+            stockMap[r.product_id][r.color] =
+              Number(stockMap[r.product_id][r.color] || 0) + Number(r.stock || 0);
           });
         }
       }
@@ -336,6 +351,13 @@
               .join("  ")
           : "—";
         tr.innerHTML =
+          '<td style="padding:10px;border-top:1px solid #eee;width:60px">' +
+          (p.image_url
+            ? '<img alt="" src="' +
+              escapeHtml(p.image_url) +
+              '" style="width:44px;height:44px;object-fit:cover;border-radius:12px;border:1px solid rgba(0,0,0,.08)" />'
+            : '<div style="width:44px;height:44px;border-radius:12px;border:1px solid rgba(0,0,0,.08);background:#f3ecec;display:flex;align-items:center;justify-content:center;font-size:11px;color:#6f7976">No</div>') +
+          "</td>" +
           '<td style="padding:10px;border-top:1px solid #eee">' +
           escapeHtml(p.title || "") +
           "</td>" +
@@ -402,98 +424,120 @@
         x.checked = as.indexOf(x.value) !== -1;
       });
 
-      // Load per-color stock quantities
+      // Load variant stock quantities (color + age_range)
       var vs = await sb
-        .from("product_color_stock")
-        .select("color,stock")
+        .from("product_variant_stock")
+        .select("color,age_range,stock")
         .eq("product_id", id);
       var vmap = {};
       if (!vs.error) {
         (vs.data || []).forEach(function (r) {
-          vmap[r.color] = clampInt(r.stock, 0);
+          vmap[String(r.color) + "||" + String(r.age_range)] = clampInt(r.stock, 0);
         });
       }
-      origColorStock = vmap;
+      origVariantStock = vmap;
       renderColorQty(vmap);
 
       setEditMode(p.id);
       openModal();
     }
 
+    // (Kept name for compatibility) Renders variant stock matrix.
     function renderColorQty(existing) {
       var wrap = document.getElementById("bb-colors");
       if (!wrap) return;
-      // After checkboxes are rendered, append qty controls under them
-      // We'll embed qty controls in a dedicated block.
       var blockId = "bb-color-qty";
       var old = document.getElementById(blockId);
       if (old) old.remove();
       var box = document.createElement("div");
       box.id = blockId;
-      box.style.cssText = "width:100%;margin-top:10px;border-top:1px dashed #e8e1e1;padding-top:10px;display:flex;flex-direction:column;gap:8px";
-      var selected = Array.from(host.querySelectorAll('input[name=\"colors\"]'))
+      box.style.cssText =
+        "width:100%;margin-top:10px;border-top:1px dashed #e8e1e1;padding-top:10px;display:flex;flex-direction:column;gap:10px";
+
+      var selectedColors = Array.from(host.querySelectorAll('input[name="colors"]'))
         .filter(function (x) { return x.checked; })
         .map(function (x) { return x.value; });
-      if (!selected.length) {
-        box.innerHTML = '<div style="color:#3f4946;font-size:12px">اختر لونًا لإدارة كميته.</div>';
+      var selectedAges = Array.from(host.querySelectorAll('input[name="age_ranges"]'))
+        .filter(function (x) { return x.checked; })
+        .map(function (x) { return x.value; });
+
+      if (!selectedColors.length || !selectedAges.length) {
+        box.innerHTML =
+          '<div style="color:#3f4946;font-size:12px">اختر لونًا + عمر/مقاس لعرض جدول الكميات.</div>';
         wrap.parentNode.appendChild(box);
         return;
       }
       var isEdit = !!editId;
       box.innerHTML =
         (isEdit
-          ? '<div style="color:#3f4946;font-size:12px;margin-bottom:6px">في التعديل: لا يمكن إنقاص/تغيير الرصيد الحالي، فقط إضافة (+) أو إضافة لون جديد.</div>'
-          : "") +
-      selected
-        .map(function (c) {
-          var val = clampInt(existing && existing[c] != null ? existing[c] : 0, 0);
-          return (
-            '<div data-color-row="' +
-            escapeHtml(c) +
-            '" style="display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #bec9c5;border-radius:12px;padding:8px 10px">' +
-            '<div style="font-weight:900">' +
-            escapeHtml(c) +
-            "</div>" +
-            '<div style="display:flex;align-items:center;gap:8px">' +
-            '<input data-color-qty="' +
-            escapeHtml(c) +
-            '" type="number" min="0" value="' +
-            escapeHtml(String(val)) +
-            '" style="width:110px;text-align:center;padding:8px 10px;border-radius:10px;border:1px solid #bec9c5' +
-            (isEdit ? ';background:#f3ecec' : "") +
-            '" ' +
-            (isEdit ? "readonly" : "") +
-            " />" +
-            '<button type="button" data-qty-inc="1" style="padding:6px 10px;border-radius:10px;border:1px solid #bec9c5;background:#fff;cursor:pointer">+1</button>' +
-            '<button type="button" data-qty-inc="5" style="padding:6px 10px;border-radius:10px;border:1px solid #bec9c5;background:#fff;cursor:pointer">+5</button>' +
-            "</div>" +
-            "</div>"
-          );
-        })
-        .join("");
-
-      // Add new color + qty row (edit mode only)
-      if (isEdit) {
-        box.innerHTML +=
-          '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px dashed #bec9c5;border-radius:12px;padding:8px 10px">' +
-          '<div style="font-weight:900">New color</div>' +
-          '<div style="display:flex;align-items:center;gap:8px">' +
-          '<input id="bb-new-color-name" placeholder="مثال: Gold" style="width:160px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid #bec9c5" dir="ltr" />' +
-          '<input id="bb-new-color-qty" type="number" min="0" value="0" style="width:110px;text-align:center;padding:8px 10px;border-radius:10px;border:1px solid #bec9c5" />' +
-          '<button type="button" id="bb-new-color-add" style="padding:8px 10px;border-radius:10px;border:0;background:#146a5c;color:#fff;font-weight:900;cursor:pointer">Add</button>' +
-          "</div>" +
-          "</div>";
-      }
+          ? '<div style="color:#3f4946;font-size:12px">في التعديل: لا يمكن إنقاص/تغيير الرصيد الحالي، فقط إضافة (+) على مستوى (اللون + العمر).</div>'
+          : '<div style="color:#3f4946;font-size:12px">حدد الكمية المبدئية لكل (لون + عمر).</div>') +
+        '<div style="overflow:auto;border:1px solid #e8e1e1;border-radius:12px">' +
+        '<table style="width:100%;border-collapse:collapse;min-width:720px">' +
+        '<thead><tr style="background:#f9f2f2">' +
+        '<th style="text-align:left;padding:8px 10px;border-bottom:1px solid #eee">Color \\ Age</th>' +
+        selectedAges
+          .slice()
+          .sort()
+          .map(function (a) {
+            return '<th style="text-align:center;padding:8px 10px;border-bottom:1px solid #eee">' + escapeHtml(a) + "</th>";
+          })
+          .join("") +
+        "</tr></thead><tbody>" +
+        selectedColors
+          .slice()
+          .sort()
+          .map(function (c) {
+            return (
+              "<tr>" +
+              '<td style="padding:8px 10px;border-top:1px solid #eee;font-weight:900">' +
+              escapeHtml(c) +
+              "</td>" +
+              selectedAges
+                .slice()
+                .sort()
+                .map(function (a) {
+                  var key = String(c) + "||" + String(a);
+                  var val = clampInt(existing && existing[key] != null ? existing[key] : 0, 0);
+                  return (
+                    '<td style="padding:8px 10px;border-top:1px solid #eee;text-align:center">' +
+                    '<div style="display:flex;align-items:center;justify-content:center;gap:6px">' +
+                    '<input data-variant-qty="' +
+                    escapeHtml(key) +
+                    '" type="number" min="0" value="' +
+                    escapeHtml(String(val)) +
+                    '" style="width:96px;text-align:center;padding:8px 10px;border-radius:10px;border:1px solid #bec9c5' +
+                    (isEdit ? ';background:#f3ecec' : "") +
+                    '" ' +
+                    (isEdit ? "readonly" : "") +
+                    " />" +
+                    (isEdit
+                      ? '<button type="button" data-vinc="1" data-vkey="' +
+                        escapeHtml(key) +
+                        '" style="padding:6px 10px;border-radius:10px;border:1px solid #bec9c5;background:#fff;cursor:pointer">+1</button>' +
+                        '<button type="button" data-vinc="5" data-vkey="' +
+                        escapeHtml(key) +
+                        '" style="padding:6px 10px;border-radius:10px;border:1px solid #bec9c5;background:#fff;cursor:pointer">+5</button>'
+                      : "") +
+                    "</div></td>"
+                  );
+                })
+                .join("") +
+              "</tr>"
+            );
+          })
+          .join("") +
+        "</tbody></table></div>";
 
       wrap.parentNode.appendChild(box);
     }
 
-    // Keep qty controls in sync with selected colors
+    // Keep qty controls in sync with selected colors/ages
     document.addEventListener(
       "change",
       function (e) {
         var t = e.target;
-        if (!t || t.name !== "colors") return;
+        if (!t || (t.name !== "colors" && t.name !== "age_ranges")) return;
         if (!modalEl() || modalEl().style.display !== "flex") return;
         renderColorQty({});
       },
@@ -505,54 +549,27 @@
       if (!b) return;
       var act = b.getAttribute("data-act");
       var id = b.getAttribute("data-id");
-      // qty +/- inside modal
-      if (b.hasAttribute("data-qty-inc") || b.hasAttribute("data-qty-dec")) {
-        var row = b.closest("[data-color-row]");
-        if (!row) return;
-        var color = row.getAttribute("data-color-row");
-        var input = row.querySelector("[data-color-qty]");
-        if (!input) return;
-        var cur = clampInt(input.value, 0);
-        if (b.hasAttribute("data-qty-inc")) cur += clampInt(b.getAttribute("data-qty-inc"), 0);
-        // Do not allow decreasing in edit mode (to protect balance)
-        if (b.hasAttribute("data-qty-dec") && !editId) cur -= clampInt(b.getAttribute("data-qty-dec"), 0);
-        input.value = String(Math.max(0, cur));
-        return;
-      }
-
-      // Add new color in edit mode
-      if (b && b.id === "bb-new-color-add") {
+      // Variant + buttons in edit mode
+      if (b.hasAttribute("data-vinc")) {
         if (!editId) return;
-        var nameEl = document.getElementById("bb-new-color-name");
-        var qtyEl = document.getElementById("bb-new-color-qty");
-        var newColor = String((nameEl && nameEl.value) || "").trim();
-        var newQty = clampInt(qtyEl && qtyEl.value, 0);
-        if (!newColor) {
-          setMsg("اكتب اسم اللون الجديد.");
-          return;
-        }
-        // ensure checkbox exists? If it's not in the predefined list, still store it in products.colors.
-        // apply stock delta through RPC (admin-only)
-        var rpc = await sb.rpc("adjust_color_stock", {
+        var k = b.getAttribute("data-vkey") || "";
+        var inc = clampInt(b.getAttribute("data-vinc"), 0);
+        if (!k) return;
+        var parts = k.split("||");
+        var color2 = parts[0] || "";
+        var age2 = parts[1] || "";
+        b.disabled = true;
+        var rpc3 = await sb.rpc("adjust_variant_stock", {
           p_product_id: editId,
-          p_color: newColor,
-          p_delta: newQty,
+          p_color: color2,
+          p_age_range: age2,
+          p_delta: inc,
         });
-        if (rpc.error) {
-          setMsg(rpc.error.message);
+        b.disabled = false;
+        if (rpc3.error) {
+          setMsg("فشل إضافة رصيد: " + rpc3.error.message);
           return;
         }
-        // append to products.colors
-        try {
-          var pr = await sb.from("products").select("colors").eq("id", editId).maybeSingle();
-          if (!pr.error) {
-            var cur = Array.isArray(pr.data && pr.data.colors) ? pr.data.colors.filter(Boolean) : [];
-            if (cur.indexOf(newColor) === -1) cur.push(newColor);
-            await sb.from("products").update({ colors: cur }).eq("id", editId);
-          }
-        } catch (e2) {}
-
-        // refresh modal quantities
         await loadProductIntoForm(editId);
         return;
       }
@@ -565,12 +582,31 @@
       }
 
       if (act === "del") {
-        if (!confirm("Delete product?")) return;
+        if (!confirm("حذف المنتج؟ إذا كان مرتبطًا بطلبات سابقة سيتم تعطيله بدل الحذف.")) return;
+
+        // Best effort: remove variant stock rows first (FK cascade should handle this if present).
+        try {
+          await sb.from("product_variant_stock").delete().eq("product_id", id);
+        } catch (e0) {}
+
         var del = await sb.from("products").delete().eq("id", id);
         if (del.error) {
+          // Common: product referenced by order_items (FK restrict) -> disable instead.
+          var msgTxt = String(del.error.message || "");
+          if (msgTxt.toLowerCase().indexOf("foreign key") !== -1 || msgTxt.indexOf("23503") !== -1) {
+            var dis = await sb.from("products").update({ active: false }).eq("id", id);
+            if (dis.error) {
+              setMsg("تعذر حذف المنتج وتعذر تعطيله: " + dis.error.message);
+              return;
+            }
+            setMsg("لا يمكن حذف المنتج لأنه مرتبط بطلبات. تم تعطيله (active=false) بدلًا من ذلك.");
+            await load();
+            return;
+          }
           setMsg(del.error.message);
           return;
         }
+        setMsg("تم حذف المنتج.");
         await load();
       }
 
@@ -660,50 +696,29 @@
       payload.colors = colors;
       payload.age_ranges = age_ranges;
 
-      // Per-color stock quantities (sum becomes products.stock)
+      // Per-variant stock quantities (color + age_range). Sum becomes products.stock.
       var qtySum = 0;
-      var colorQty = {};
+      var variantQty = {}; // key: color||age -> qty
       colors.forEach(function (c) {
-        var inp = host.querySelector('[data-color-qty="' + c + '"]');
-        var q = clampInt(inp ? inp.value : 0, 0);
-        colorQty[c] = q;
-        qtySum += q;
+        age_ranges.forEach(function (a) {
+          var key = String(c) + "||" + String(a);
+          var inp = host.querySelector('[data-variant-qty="' + key + '"]');
+          var q = clampInt(inp ? inp.value : 0, 0);
+          variantQty[key] = q;
+          qtySum += q;
+        });
       });
       payload.stock = qtySum;
 
       if (editId) {
         // do not force active=true on edit
         delete payload.active;
-        // In edit mode: do NOT overwrite stock quantities. Only update product fields + colors list.
-        // products.stock will be updated by recalc when we adjust deltas.
+        // In edit mode: do NOT overwrite stock quantities here. Use +/- buttons (RPC) to adjust variants.
         delete payload.stock;
         var up = await sb.from("products").update(payload).eq("id", editId);
         if (up.error) {
           setMsg(up.error.message);
           return;
-        }
-
-        // Apply stock increases only (deltas) to protect balance.
-        for (var i = 0; i < colors.length; i++) {
-          var c = colors[i];
-          var old = clampInt(origColorStock && origColorStock[c] != null ? origColorStock[c] : 0, 0);
-          var now = clampInt(colorQty[c], 0);
-          var delta = now - old;
-          if (delta < 0) {
-            setMsg("لا يمكن إنقاص رصيد اللون (" + c + "). استخدم الإلغاء/المرتجع عبر الطلبات.");
-            return;
-          }
-          if (delta > 0) {
-            var rpc2 = await sb.rpc("adjust_color_stock", {
-              p_product_id: editId,
-              p_color: c,
-              p_delta: delta,
-            });
-            if (rpc2.error) {
-              setMsg("فشل إضافة رصيد للون " + c + ": " + rpc2.error.message);
-              return;
-            }
-          }
         }
 
         clearForm();
@@ -715,13 +730,22 @@
         }
         var newId = ins.data && ins.data.id;
         if (newId) {
-          var rows2 = Object.keys(colorQty).map(function (c) {
-            return { product_id: newId, color: c, stock: colorQty[c], updated_at: new Date().toISOString() };
+          var rows2 = Object.keys(variantQty).map(function (k) {
+            var parts = k.split("||");
+            return {
+              product_id: newId,
+              color: parts[0],
+              age_range: parts[1],
+              stock: variantQty[k],
+              updated_at: new Date().toISOString(),
+            };
           });
           if (rows2.length) {
-            var ups2 = await sb.from("product_color_stock").upsert(rows2, { onConflict: "product_id,color" });
+            var ups2 = await sb
+              .from("product_variant_stock")
+              .upsert(rows2, { onConflict: "product_id,color,age_range" });
             if (ups2.error) {
-              setMsg("تم إنشاء المنتج لكن فشل حفظ كميات الألوان: " + ups2.error.message);
+              setMsg("تم إنشاء المنتج لكن فشل حفظ كميات المخزون: " + ups2.error.message);
               return;
             }
           }

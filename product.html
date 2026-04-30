@@ -3,7 +3,7 @@
 <html dir="rtl" lang="ar"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta_Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts removed to avoid MIME errors on restricted networks -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -122,9 +122,10 @@
 <div class="flex items-center gap-8">
 <a class="text-2xl font-black text-teal-500 tracking-tight font-display-lg" href="home.html">BeebBeeb Shopping</a>
 <nav class="hidden md:flex gap-6">
-<a class="text-teal-600 font-bold border-b-2 border-teal-400 font-body-base py-1" href="home.html">الرئيسية</a>
-<a class="text-gray-500 hover:bg-teal-50 transition-colors duration-300 px-3 py-1 rounded-lg font-body-base" href="home.html#bb-new-arrivals">المتجر</a>
-<a class="text-gray-500 hover:bg-teal-50 transition-colors duration-300 px-3 py-1 rounded-lg font-body-base" href="home.html#bb-new-arrivals">العروض</a>
+<a data-i18n-ar="الرئيسية" data-i18n-en="Home" class="text-teal-600 font-bold border-b-2 border-teal-400 font-body-base py-1" href="home.html">الرئيسية</a>
+<a data-i18n-ar="المتجر" data-i18n-en="Shop" class="text-gray-500 hover:bg-teal-50 transition-colors duration-300 px-3 py-1 rounded-lg font-body-base" href="home.html#bb-new-arrivals">المتجر</a>
+<a data-i18n-ar="العروض" data-i18n-en="Offers" class="text-gray-500 hover:bg-teal-50 transition-colors duration-300 px-3 py-1 rounded-lg font-body-base" href="home.html#bb-new-arrivals">العروض</a>
+<a data-i18n-ar="طلباتي" data-i18n-en="My orders" class="text-gray-500 hover:bg-teal-50 transition-colors duration-300 px-3 py-1 rounded-lg font-body-base" href="my-orders.html">طلباتي</a>
 </nav>
 </div>
 <div class="flex items-center gap-4">
@@ -132,7 +133,16 @@
 <span class="material-symbols-outlined text-outline" data-icon="search">search</span>
 <input class="bg-transparent border-none focus:ring-0 text-sm w-48 font-body-base" placeholder="بحث عن منتجات..." type="text"/>
 </div>
+<div class="hidden md:flex items-center bg-surface-container-low rounded-full px-4 py-2 border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline text-lg">language</span>
+<select data-bb-lang-select class="bg-transparent border-none focus:ring-0 text-sm font-semibold mr-2">
+<option value="ar">العربية (العراق)</option>
+<option value="en">English (US)</option>
+</select>
+</div>
 <div class="flex gap-2">
+<a id="bb-customer-pill" href="login.html" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm font-bold text-teal-600 hover:bg-teal-50 rounded-full">دخول</a>
+<button id="bb-customer-logout" type="button" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-teal-50 rounded-full">خروج</button>
 <button class="p-2 hover:bg-teal-50 rounded-full transition-colors"><span class="material-symbols-outlined text-primary" data-icon="language">language</span></button>
 <button class="p-2 hover:bg-teal-50 rounded-full transition-colors"><span class="material-symbols-outlined text-primary" data-icon="payments">payments</span></button>
 <a href="checkout.html" class="p-2 hover:bg-teal-50 rounded-full transition-colors relative">
@@ -150,41 +160,23 @@
 <span class="material-symbols-outlined text-xs" data-icon="chevron_left">chevron_left</span>
 <a class="hover:text-primary" href="home.html#bb-new-arrivals">ملابس الأطفال</a>
 <span class="material-symbols-outlined text-xs" data-icon="chevron_left">chevron_left</span>
-<span class="font-semibold text-primary">طقم قطني ناعم "سحاب الصحراء"</span>
+<span id="bb-breadcrumb-title" class="font-semibold text-primary"></span>
 </nav>
 <!-- Product Hero Section -->
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
 <!-- Image Gallery (Asymmetric Layout) -->
 <div class="lg:col-span-7 grid grid-cols-6 gap-4">
 <div class="col-span-6 rounded-[2rem] overflow-hidden bg-white ambient-card border border-primary-container/20">
-<img id="bb-product-image" class="w-full h-[500px] object-cover" data-alt="studio photograph of a soft organic cotton baby outfit in sand color on a neutral background with warm soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfl3g0enYx-YGHJW79NePnNcbraS0DSesSUvbAFNRK6fHcs_Gyz9HASNYYPKvFHXeDE7HoYNa0XoyltIxdZv64vKZr34wORsLds-bWwG7xuvVszUxkqBgO9lhHsRAmiuo2PcC_vN6O00guuzm1zWFVNhfvtiBgun1r-CBOI0I8BiMM6UBMCT0qoXZrTV5Z7ukCNgQWqWm-4i8J5xKEFFu7hlzYcT9Idb5GbIyRNHQ9oMd4GmZ2mLANTiKAQLp0Y-bOaZVs3e3WKiM"/>
-</div>
-<div class="col-span-2 rounded-2xl overflow-hidden bg-white ambient-card border border-primary-container/20 aspect-square">
-<img class="w-full h-full object-cover" data-alt="close up detail of high quality organic cotton fabric weave and wooden buttons on baby clothes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDveeu_zs-An7gqo53Lup8ZoMkVNluO-xsGM5oHpDhrVNaaUM59CEKVShXQkT3jyjtJDT-2IaUsfMOsj7ddjtTv0nMe-Z-A-6YO0w8Qq6luc4LLMtS_ubkU97CUUSF3qsfrmqupeP_6Wp72d0YDzkQX6rJJGzAwB5E5qsfI8r5qc2e8tsUwytJ1Am2vneMsWq3cHkGw0EsYtzcQa77vKmRjqy3UisWU_I6LtSnpvqu_2xdn_p4k1GlPAQuNNDeft98J5qt_Jp_OabI"/>
-</div>
-<div class="col-span-2 rounded-2xl overflow-hidden bg-white ambient-card border border-primary-container/20 aspect-square">
-<img class="w-full h-full object-cover" data-alt="lifestyle shot of baby clothes folded neatly next to a plush elephant toy in a sunlit nursery" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl8sA8jYFmHzt21ASsKaoaYSm44_Ffg5iRbU32j9XPBG7KVUsHLiGSJk5jdE3-CDpRGOOZQVVHQf7ID7gVNJ3hzN0sL1BXWRWWtTpYyAPWF010-HHBvDQOcM3QN4rPNPsbEbHbF5H2suuVP_KeK9gY89lEUw-C0kjfYbVpwR5QOgyoAcKDF7jjUTnS3YdXMuGpBZzIvclOVEd8dK0uVj7Nn8w6hRlFP4QICQj2REghPamYW6IXjVkVFlSiEk-j93iGzCard_XHudI"/>
-</div>
-<div class="col-span-2 rounded-2xl overflow-hidden bg-white ambient-card border border-primary-container/20 aspect-square relative group cursor-pointer">
-<img class="w-full h-full object-cover" data-alt="alternate view of baby outfit set including pants and a small matching hat in soft beige" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7Rmwx_YpCmxjhqXno3vWZTrvXIw6fs3eqmJKliCNXm166d2DLZFdudTYPk2b53NtjJ4kFKS8WEsYUvFF2iXdcjOtTtkw4wTFEIZ2aWsA8O_FPHbFkanE3B6TGzD41bxkKKF2aPPG90njSP2cidtAgmCc5kgir7bGiy9bmtebHyKIH6_vqbym-z18pV2CtnUBwqtqg-IZpSeLHl0nWBEnf5dHmiSeWYxDDaLEL3fPma1pBYkj6_H_in_1fWrhuDFyO6Dost5WUVF4"/>
-<div class="absolute inset-0 bg-primary/20 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-<span class="text-white font-bold">+٤ صور</span>
-</div>
+<img id="bb-product-image" class="w-full h-[500px] object-cover" alt="Product image" src=""/>
 </div>
 </div>
 <!-- Product Details -->
 <div class="lg:col-span-5 flex flex-col gap-6">
 <div>
-<span class="inline-block px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold font-label-caps mb-3">وصل حديثاً</span>
-<h1 id="bb-product-title" class="font-display-lg text-display-lg text-on-surface mb-2">طقم قطني ناعم "سحاب الصحراء"</h1>
+<h1 id="bb-product-title" class="font-display-lg text-display-lg text-on-surface mb-2"></h1>
 <p id="bb-product-title-en" class="text-sm text-on-surface-variant" dir="ltr"></p>
 <div class="flex items-center gap-4">
-<span id="bb-product-price" class="font-price-tag text-price-tag text-primary">٤٥,٠٠٠ د.ع</span>
-<span class="text-on-surface-variant line-through text-sm">٦٠,٠٠٠ د.ع</span>
-<div class="flex items-center bg-tertiary-fixed text-on-tertiary-container px-2 py-0.5 rounded text-xs font-bold">
-<span class="material-symbols-outlined text-xs mr-1" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-<span>٤.٩ (١٢٨ تقييم)</span>
-</div>
+<span id="bb-product-price" class="font-price-tag text-price-tag text-primary"></span>
 </div>
 </div>
 <div class="h-px bg-outline-variant/30 w-full"></div>
@@ -194,12 +186,10 @@
 <span class="font-headline-md text-sm text-on-surface">اختر المقاس</span>
 <button class="text-primary text-xs font-bold underline">دليل المقاسات</button>
 </div>
-<div class="flex flex-wrap gap-2">
-<button class="px-4 py-2 rounded-full border-2 border-primary bg-primary text-white font-bold text-sm transition-all">٠-٣ أشهر</button>
-<button class="px-4 py-2 rounded-full border-2 border-outline-variant hover:border-primary-container text-on-surface-variant font-bold text-sm transition-all">٣-٦ أشهر</button>
-<button class="px-4 py-2 rounded-full border-2 border-outline-variant hover:border-primary-container text-on-surface-variant font-bold text-sm transition-all">٦-١٢ شهر</button>
-<button class="px-4 py-2 rounded-full border-2 border-outline-variant hover:border-primary-container text-on-surface-variant font-bold text-sm transition-all">١٢-١٨ شهر</button>
-<button class="px-4 py-2 rounded-full border-2 border-outline-variant opacity-50 cursor-not-allowed text-on-surface-variant font-bold text-sm transition-all">٢٤ شهر</button>
+<div id="bb-age-options" class="flex flex-wrap gap-2"></div>
+<div class="flex justify-between items-center">
+  <span id="bb-age-selected" class="text-xs text-on-surface-variant"></span>
+  <span id="bb-age-msg" class="text-xs text-error"></span>
 </div>
 </div>
 <!-- Color selector (dynamic) -->
@@ -252,65 +242,15 @@
 </div>
 </div>
 </div>
-<!-- Related Products Section -->
-<section class="mt-24">
-<div class="flex justify-between items-end mb-8">
-<div>
-<h2 class="font-display-lg text-headline-md text-on-surface mb-1">قد يعجبك أيضاً</h2>
-<p class="text-on-surface-variant text-sm">مجموعات مختارة بعناية لتناسب ذوقك</p>
-</div>
-<button class="text-primary font-bold flex items-center gap-1 hover:translate-x-1 transition-transform">
-                    عرض الكل
-                    <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
-</button>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-<!-- Related Card 1 -->
-<div class="group cursor-pointer">
-<div class="relative rounded-3xl overflow-hidden aspect-[4/5] mb-4 ambient-card bg-white">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="lifestyle photo of a toddler playing in a cream colored knit sweater with a minimalist aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6OVRFG0i56FvXrIQ3HvCqj5Oiu6R3_ILQKK4ZQzEtLpcV7OxNZ1fBwWsc72zzWaINC62ZrUovucg8O0qgjVZdB1FM0oBPT4w2GT7BeJcmrAddBz9QlS9trRv-ugrdvANiVtFgnaevip0eXHjeGMLA5l954pZA0AAq40C7TfG6DLpaRPOC_HIxWntZBRD3kVFWHsGZF1EzzcixniUmdp6LL4xyTyniJ83Pyvdhr_g69g6-mW-79MG3JFWKwqwyEwFCFL9MopwBeZI"/>
-<button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-primary hover:bg-white transition-all shadow-sm">
-<span class="material-symbols-outlined text-sm" data-icon="favorite">favorite</span>
-</button>
-</div>
-<h3 class="font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">كنزة صوفية "غيمة بيضاء"</h3>
-<p class="text-primary font-price-tag text-sm">٣٢,٠٠٠ د.ع</p>
-</div>
-<!-- Related Card 2 -->
-<div class="group cursor-pointer">
-<div class="relative rounded-3xl overflow-hidden aspect-[4/5] mb-4 ambient-card bg-white">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="set of light gray baby clothes with a small bib and matching booties on a wood surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7MoXMB_7uCf_UKF5R6IYc0jy_BRnNaF2x7Brm5YzohDRbDZh9c0Lq8SQWtPtqFRA8kHE98FZRXz__kCLgdPzBFBLX_7boN_-iG1Wdk0PpY5NciTGOb7wrAq4UQXAdoeGfkOqmYOEJ4So997eNcpRxGXmE9z7mh86sj7fUvs6KG_wZs24y37iUbc4RWMSCTVjCrhj7GO22YkEBD6HkXys1Dn9eNAkkgtPdJ-5mCBJQr7i6b_-STSED95FVN7vWciCKUVR0XsfF7SE"/>
-<button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-primary hover:bg-white transition-all shadow-sm">
-<span class="material-symbols-outlined text-sm" data-icon="favorite">favorite</span>
-</button>
-<span class="absolute top-4 left-4 bg-error text-white text-[10px] px-2 py-1 rounded-full font-bold">خصم ٢٠٪</span>
-</div>
-<h3 class="font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">طقم النوم الرمادي الفاخر</h3>
-<p class="text-primary font-price-tag text-sm">٣٨,٠٠٠ د.ع</p>
-</div>
-<!-- Related Card 3 -->
-<div class="group cursor-pointer">
-<div class="relative rounded-3xl overflow-hidden aspect-[4/5] mb-4 ambient-card bg-white">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="overhead view of pastel yellow baby onesie and matching headbands with floral pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvkPnph2HytJQZuYEaOwA7ly9K1mMhaYsHhQIsA-VFKK30N5WOj_B32G8f7-wboQ1ukkbI2a3Jx6f-XBmP5774sX_XLOGnrUYYnt6Ra-FGRPqjtBMxGvz8irqiwFMp0kSzJuA4hrnqirDI2cgiuSbrqeYnxZhcwJRaMJ3p2TcoCJLE-vTyr9mJBfeVJ5BQSX2oq5kKuYbwJ6Lou9hNEzHhk4cEqWf7tjnPMpu9UbVoLmq0RS2-LajRZB_KXfvuYbvt5SGjsQONQeo"/>
-<button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-primary hover:bg-white transition-all shadow-sm">
-<span class="material-symbols-outlined text-sm" data-icon="favorite">favorite</span>
-</button>
-</div>
-<h3 class="font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">أوفرهول "شمس الصباح"</h3>
-<p class="text-primary font-price-tag text-sm">٢٧,٠٠٠ د.ع</p>
-</div>
-<!-- Related Card 4 -->
-<div class="group cursor-pointer">
-<div class="relative rounded-3xl overflow-hidden aspect-[4/5] mb-4 ambient-card bg-white">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="a tiny pair of brown leather baby moccasins next to a soft linen baby blanket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAOJmivojrnyTOp5v7C2UF3O8Bym8FI7NIvKb3Lm2UdB_YJK_7XepBZ_NbqIgnGg2axT4sYHYGPeikEwkbVHGjcKeWpv1mvWNgvKgqpZ_SWLtt7tQ6BDberVzvQpixJ3KLtUaGKK7N6Kkzfzs3qZcgCNcQKp5gaSz1HLBblcnp86pPjijAha-dq67eAA0-hojW1Xgjg_NlPcpctPMybEll1A-JFpnPd0GrsIfQOdZVYQGvso161TIc1CtNGcGz2QlRgmZMemcCOL4"/>
-<button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-primary hover:bg-white transition-all shadow-sm">
-<span class="material-symbols-outlined text-sm" data-icon="favorite">favorite</span>
-</button>
-</div>
-<h3 class="font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">حذاء جلد طبيعي ناعم</h3>
-<p class="text-primary font-price-tag text-sm">١٩,٥٠٠ د.ع</p>
-</div>
-</div>
+<!-- Related Products (optional, dynamic) -->
+<section class="mt-24 hidden" id="bb-related">
+  <div class="flex justify-between items-end mb-8">
+    <div>
+      <h2 class="font-display-lg text-headline-md text-on-surface mb-1">قد يعجبك أيضاً</h2>
+      <p class="text-on-surface-variant text-sm">منتجات من المتجر</p>
+    </div>
+  </div>
+  <div id="bb-related-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
 </section>
 </main>
 <!-- Footer -->
@@ -328,7 +268,6 @@
 <h4 class="font-bold text-on-surface mb-4">روابط سريعة</h4>
 <ul class="flex flex-col gap-2">
 <li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="checkout.html">الشحن والإرجاع</a></li>
-<li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="tracking.html">تتبع طلبك</a></li>
 <li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="login.html">تسجيل الدخول</a></li>
 <li><a class="text-gray-600 hover:text-teal-400 transition-all text-sm" href="login.html">الدخول</a></li>
 </ul>
