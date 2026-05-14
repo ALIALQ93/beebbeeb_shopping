@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <!-- Google Fonts removed to avoid MIME errors on restricted networks -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
       body {
         font-family: "Plus Jakarta Sans", sans-serif;
       }
@@ -85,20 +92,25 @@
       </aside>
 
       <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
-        <div class="flex items-end justify-between gap-3 mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h1 class="text-2xl font-black">طلبات إعادة تعيين كلمة المرور</h1>
             <p class="text-sm text-slate-600">
               هذه الطلبات تأتي من صفحة الزبون (نسيت كلمة المرور) ليتم التعامل معها يدويًا عبر واتساب.
             </p>
           </div>
-          <button
-            id="bb-support-refresh"
-            class="px-4 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 font-bold text-sm"
-            type="button"
-          >
-            تحديث
-          </button>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" data-bb-support-filter="open" class="px-4 py-2 rounded-full bg-teal-700 text-white font-bold text-sm">مفتوحة</button>
+            <button type="button" data-bb-support-filter="closed" class="px-4 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 font-bold text-sm text-slate-700">مغلقة</button>
+            <button type="button" data-bb-support-filter="all" class="px-4 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 font-bold text-sm text-slate-700">الكل</button>
+            <button
+              id="bb-support-refresh"
+              class="px-4 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 font-bold text-sm"
+              type="button"
+            >
+              تحديث
+            </button>
+          </div>
         </div>
 
         <div id="bb-support-msg" class="text-sm text-red-600 mb-3"></div>

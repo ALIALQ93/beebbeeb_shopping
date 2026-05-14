@@ -430,7 +430,16 @@
           note: "Customer requested password reset (manual via WhatsApp).",
         });
         if (ins.error) {
-          setMsg("تعذر إرسال الطلب: " + ins.error.message);
+          var errMsg = String(ins.error.message || "");
+          var errCode = String(ins.error.code || "");
+          if (
+            errCode === "23505" ||
+            /duplicate|unique/i.test(errMsg)
+          ) {
+            setMsg("لديك طلب مفتوح مسبقًا بنفس رقم الهاتف. انتظر تواصل الإدارة أو حاول لاحقًا.");
+          } else {
+            setMsg("تعذر إرسال الطلب: " + errMsg);
+          }
           return;
         }
         setMsg("تم إرسال طلب للإدارة. سيتم التواصل معك على واتساب.");
