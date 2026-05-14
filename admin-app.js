@@ -54,16 +54,58 @@
     host.style.cssText = "max-width:1100px;margin:0 auto;padding:0 0 12px;";
     host.innerHTML =
       "<style>" +
+      "#bb-prod-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(29,27,27,.42);backdrop-filter:blur(4px);opacity:0;transition:opacity .22s ease}" +
+      "#bb-prod-modal.bb-modal-open{display:flex;opacity:1}" +
+      "#bb-prod-modal.bb-modal-closing{opacity:0}" +
+      ".bb-modal-panel{width:100%;max-width:min(1040px,96vw);max-height:min(92vh,920px);background:#fff;border-radius:20px;border:1px solid #e8e1e1;box-shadow:0 24px 64px rgba(20,106,92,.18);display:flex;flex-direction:column;overflow:hidden;transform:translateY(16px) scale(.98);opacity:0;transition:transform .24s ease,opacity .24s ease}" +
+      "#bb-prod-modal.bb-modal-open .bb-modal-panel{transform:translateY(0) scale(1);opacity:1}" +
+      "#bb-prod-modal.bb-modal-closing .bb-modal-panel{transform:translateY(10px) scale(.985);opacity:0}" +
+      ".bb-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;background:linear-gradient(180deg,#f9f2f2 0%,#fff 100%);border-bottom:1px solid #ede7e6;flex-shrink:0}" +
+      ".bb-modal-head h3{margin:0;font-size:18px;font-weight:900;color:#1d1b1b}" +
+      ".bb-modal-head p{margin:4px 0 0;font-size:12px;color:#6f7976}" +
+      ".bb-modal-close{width:40px;height:40px;border:0;border-radius:12px;background:#f3ecec;color:#3f4946;font-size:18px;font-weight:900;cursor:pointer;transition:background .15s ease,transform .15s ease}" +
+      ".bb-modal-close:hover{background:#e8e1e1;transform:scale(1.04)}" +
+      "#bb-prod-modal-body{padding:18px 20px 8px;overflow:auto;flex:1;min-height:0;scroll-behavior:smooth}" +
+      ".bb-form-section{margin-bottom:18px;padding:14px 16px;border:1px solid #ede7e6;border-radius:16px;background:#fff}" +
+      ".bb-form-section-title{margin:0 0 12px;font-size:13px;font-weight:900;color:#146a5c;letter-spacing:.02em}" +
+      ".bb-form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}" +
+      ".bb-field{display:flex;flex-direction:column;gap:6px;min-width:0}" +
+      ".bb-field-span2{grid-column:span 2}" +
+      ".bb-field-span4{grid-column:1 / -1}" +
+      ".bb-field label{font-size:12px;font-weight:800;color:#3f4946}" +
+      ".bb-field input,.bb-field textarea{width:100%;padding:11px 12px;border:1px solid #bec9c5;border-radius:12px;background:#fff;font:inherit;transition:border-color .15s ease,box-shadow .15s ease}" +
+      ".bb-field input:focus,.bb-field textarea:focus{outline:none;border-color:#86d2c1;box-shadow:0 0 0 3px rgba(134,210,193,.28)}" +
+      ".bb-field input[readonly]{background:#f3ecec;color:#6f7976}" +
+      ".bb-chip-grid{display:flex;flex-wrap:wrap;gap:8px;max-height:220px;overflow:auto;padding:2px}" +
+      ".bb-chip{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1.5px solid #bec9c5;border-radius:999px;background:#fff;cursor:pointer;user-select:none;transition:all .15s ease}" +
+      ".bb-chip:hover{border-color:#86d2c1;background:#f7fffc}" +
+      ".bb-chip input{position:absolute;opacity:0;pointer-events:none}" +
+      ".bb-chip.bb-chip--on{border-color:#146a5c;background:#e8f7f3;box-shadow:0 0 0 2px rgba(20,106,92,.12)}" +
+      ".bb-chip-swatch{width:14px;height:14px;border-radius:999px;border:1px solid rgba(0,0,0,.12);flex-shrink:0}" +
+      ".bb-image-drop{grid-column:1 / -1;border:1.5px dashed #bec9c5;border-radius:16px;padding:16px;background:#fafafa;transition:border-color .15s ease,background .15s ease}" +
+      ".bb-image-drop.bb-drop-active{border-color:#146a5c;background:#f2fbf8}" +
+      ".bb-image-drop-inner{display:grid;grid-template-columns:140px 1fr;gap:14px;align-items:center}" +
+      "#bb-prod-image-preview{width:140px;height:140px;border-radius:14px;object-fit:cover;border:1px solid #e8e1e1;background:#f3ecec}" +
+      ".bb-image-placeholder{width:140px;height:140px;border-radius:14px;border:1px dashed #bec9c5;background:#fff;display:flex;align-items:center;justify-content:center;color:#6f7976;font-size:12px;text-align:center;padding:10px}" +
+      ".bb-modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 20px 18px;border-top:1px solid #ede7e6;background:#fff;flex-shrink:0}" +
+      ".bb-btn{padding:11px 16px;border:0;border-radius:12px;font-weight:900;cursor:pointer;transition:transform .12s ease,opacity .12s ease,box-shadow .12s ease}" +
+      ".bb-btn:active{transform:scale(.98)}" +
+      ".bb-btn-primary{background:#42617d;color:#fff;box-shadow:0 8px 20px rgba(66,97,125,.22)}" +
+      ".bb-btn-primary:hover{opacity:.94}" +
+      ".bb-btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}" +
+      ".bb-btn-secondary{background:#f3ecec;color:#1d1b1b}" +
+      ".bb-btn-secondary:hover{background:#e8e1e1}" +
       "@media (max-width: 980px) {" +
-      "  #bbProdForm{grid-template-columns:1fr 1fr !important;}" +
-      "  #bbProdForm textarea,#bbProdForm input[id='bb-prod-image'],#bbProdForm input[id='bb-prod-file']{grid-column:1 / span 2 !important;}" +
+      "  .bb-form-grid{grid-template-columns:1fr 1fr}" +
+      "  .bb-field-span2,.bb-field-span4{grid-column:1 / -1}" +
+      "  .bb-image-drop-inner{grid-template-columns:1fr}" +
       "}" +
       "@media (max-width: 640px) {" +
-      "  #bb-prod-modal{padding:10px !important; align-items:stretch !important;}" +
-      "  #bb-prod-modal > div{max-width:100% !important;}" +
-      "  #bbProdForm{grid-template-columns:1fr !important;}" +
-      "  #bbProdForm textarea,#bbProdForm input[id='bb-prod-image'],#bbProdForm input[id='bb-prod-file']{grid-column:1 / span 1 !important;}" +
-      "  #bb-prod-modal-body{max-height:calc(100vh - 90px) !important; overflow:auto !important;}" +
+      "  #bb-prod-modal{padding:10px;align-items:stretch}" +
+      "  .bb-modal-panel{max-width:100%;max-height:calc(100vh - 20px);border-radius:16px}" +
+      "  .bb-form-grid{grid-template-columns:1fr}" +
+      "  #bb-prod-modal-body{padding:14px 14px 6px}" +
+      "  .bb-modal-foot{padding:12px 14px 14px}" +
       "}" +
       "</style>" +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">' +
@@ -86,41 +128,42 @@
       '<th style="text-align:right;padding:10px">Actions</th>' +
       '</tr></thead><tbody id="bbProdRows"></tbody></table></div>' +
       // Modal
-      '<div id="bb-prod-modal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:99999;padding:16px">' +
-      '<div style="width:100%;max-width:920px;background:#fff;border-radius:16px;border:1px solid #e8e1e1;overflow:hidden">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:#f9f2f2">' +
-      '<div style="font-weight:900" id="bb-modal-title">إضافة منتج</div>' +
-      '<button id="bb-modal-close" type="button" style="background:#eee;border:0;border-radius:10px;padding:8px 10px;font-weight:900;cursor:pointer">✕</button>' +
+      '<div id="bb-prod-modal" role="dialog" aria-modal="true" aria-labelledby="bb-modal-title">' +
+      '<div class="bb-modal-panel">' +
+      '<div class="bb-modal-head">' +
+      '<div><h3 id="bb-modal-title">إضافة منتج</h3><p>املأ التفاصيل ثم احفظ المنتج في المتجر</p></div>' +
+      '<button id="bb-modal-close" type="button" class="bb-modal-close" aria-label="إغلاق">✕</button>' +
       "</div>" +
-      '<div id="bb-prod-modal-body" style="padding:12px 14px;max-height:calc(100vh - 140px);overflow:auto">' +
-      '<form id="bbProdForm" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;align-items:start">' +
-      '<input id="bb-prod-title" name="title" placeholder="العنوان" style="padding:10px 12px;border:1px solid #bec9c5;border-radius:10px" required>' +
-      '<input id="bb-prod-title-en" name="title_en" placeholder="English name (اختياري)" style="padding:10px 12px;border:1px solid #bec9c5;border-radius:10px" dir="ltr">' +
-      '<input id="bb-prod-price" name="price_iqd" placeholder="السعر (IQD)" type="number" style="padding:10px 12px;border:1px solid #bec9c5;border-radius:10px" required>' +
-      '<input id="bb-prod-stock" name="stock" placeholder="المخزون (محسوب من الألوان)" type="number" style="padding:10px 12px;border:1px solid #bec9c5;border-radius:10px;background:#f3ecec" value="0" readonly>' +
-      '<input id="bb-prod-discount" name="discount_percent" placeholder="خصم % (اختياري)" type="number" min="0" max="90" style="padding:10px 12px;border:1px solid #bec9c5;border-radius:10px" value="0">' +
-      '<div style="display:flex;gap:10px;justify-content:flex-end">' +
-      '<button id="bb-edit-cancel" type="button" style="background:#eee;color:#111;border:0;border-radius:10px;padding:10px 12px;font-weight:900;cursor:pointer;display:none">إلغاء</button>' +
-      '<button id="bb-prod-submit" type="submit" style="background:#42617d;color:#fff;border:0;border-radius:10px;padding:10px 12px;font-weight:900;cursor:pointer">إضافة</button>' +
-      "</div>" +
-      '<textarea id="bb-prod-desc" name="description" placeholder="وصف مختصر (اختياري)" rows="2" style="grid-column:1 / span 4;padding:10px 12px;border:1px solid #bec9c5;border-radius:10px"></textarea>' +
-      '<input id="bb-prod-image" name="image_url" placeholder="رابط صورة (اختياري)" style="grid-column:1 / span 4;padding:10px 12px;border:1px solid #bec9c5;border-radius:10px" dir="ltr">' +
-      '<input id="bb-prod-file" name="image_file" type="file" accept="image/*" style="grid-column:1 / span 4;padding:10px 12px;border:1px dashed #bec9c5;border-radius:10px;background:#fafafa">' +
-      '<div style="grid-column:1 / span 4;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px">' +
-      '<div style="border:1px solid #e8e1e1;border-radius:12px;padding:10px">' +
-      '<div style="font-weight:900;margin-bottom:8px">الألوان</div>' +
-      '<div id="bb-colors" style="display:flex;flex-wrap:wrap;gap:8px"></div>' +
-      "</div>" +
-      '<div style="border:1px solid #e8e1e1;border-radius:12px;padding:10px">' +
-      '<div style="font-weight:900;margin-bottom:8px">الأعمار/المقاسات</div>' +
-      '<div id="bb-ages" style="display:flex;flex-wrap:wrap;gap:8px;max-height:160px;overflow:auto"></div>' +
-      "</div>" +
-      "</div>" +
-      "</form>" +
-      "</div>" +
-      "</div>" +
-      "</div>";
-
+      '<div id="bb-prod-modal-body">' +
+      '<form id="bbProdForm">' +
+      '<section class="bb-form-section">' +
+      '<h4 class="bb-form-section-title">معلومات أساسية</h4>' +
+      '<div class="bb-form-grid">' +
+      '<div class="bb-field bb-field-span2"><label for="bb-prod-title">العنوان</label><input id="bb-prod-title" name="title" placeholder="مثال: بلوزة قطنية" required></div>' +
+      '<div class="bb-field bb-field-span2"><label for="bb-prod-title-en">الاسم بالإنجليزية (اختياري)</label><input id="bb-prod-title-en" name="title_en" placeholder="English name" dir="ltr"></div>' +
+      '<div class="bb-field"><label for="bb-prod-price">السعر (IQD)</label><input id="bb-prod-price" name="price_iqd" type="number" min="0" placeholder="25000" required></div>' +
+      '<div class="bb-field"><label for="bb-prod-discount">خصم %</label><input id="bb-prod-discount" name="discount_percent" type="number" min="0" max="90" value="0"></div>' +
+      '<div class="bb-field"><label for="bb-prod-stock">المخزون الكلي</label><input id="bb-prod-stock" name="stock" type="number" value="0" readonly></div>' +
+      "</div></section>" +
+      '<section class="bb-form-section"><h4 class="bb-form-section-title">الوصف</h4>' +
+      '<div class="bb-field"><label for="bb-prod-desc">وصف مختصر</label><textarea id="bb-prod-desc" name="description" rows="3" placeholder="تفاصيل المنتج للزبائن"></textarea></div></section>' +
+      '<section class="bb-form-section"><h4 class="bb-form-section-title">الصورة</h4>' +
+      '<div class="bb-image-drop" id="bb-image-drop">' +
+      '<div class="bb-image-drop-inner">' +
+      '<div id="bb-image-preview-host"><div class="bb-image-placeholder">معاينة<br/>الصورة</div></div>' +
+      '<div class="bb-field"><label for="bb-prod-image">رابط الصورة</label><input id="bb-prod-image" name="image_url" placeholder="https://..." dir="ltr">' +
+      '<label for="bb-prod-file" style="margin-top:10px">أو ارفع صورة</label><input id="bb-prod-file" name="image_file" type="file" accept="image/*"></div>' +
+      "</div></div></section>" +
+      '<section class="bb-form-section"><h4 class="bb-form-section-title">الألوان والمقاسات</h4>' +
+      '<div class="bb-form-grid">' +
+      '<div class="bb-field bb-field-span2"><label>الألوان</label><div id="bb-colors" class="bb-chip-grid"></div></div>' +
+      '<div class="bb-field bb-field-span2"><label>الأعمار / المقاسات</label><div id="bb-ages" class="bb-chip-grid"></div>' +
+      "</div></section>" +
+      "</form></div>" +
+      '<div class="bb-modal-foot">' +
+      '<button id="bb-edit-cancel" type="button" class="bb-btn bb-btn-secondary" style="display:none">إلغاء</button>' +
+      '<button id="bb-prod-submit" type="submit" form="bbProdForm" class="bb-btn bb-btn-primary">إضافة</button>' +
+      "</div></div></div>";
     mount.appendChild(host);
 
     function renderOptions() {
@@ -128,13 +171,13 @@
       if (cHost) {
         cHost.innerHTML = COLORS.map(function (c) {
           return (
-            '<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #bec9c5;border-radius:999px;cursor:pointer;background:#fff">' +
+            '<label class="bb-chip">' +
             '<input type="checkbox" name="colors" value="' +
             escapeHtml(c.v) +
             '"/>' +
-            '<span style="width:14px;height:14px;border-radius:999px;background:' +
+            '<span class="bb-chip-swatch" style="background:' +
             escapeHtml(c.hex) +
-            ';border:1px solid rgba(0,0,0,.12)"></span>' +
+            '"></span>' +
             "<span>" +
             escapeHtml(c.v) +
             "</span>" +
@@ -147,7 +190,7 @@
       if (aHost) {
         aHost.innerHTML = AGE_RANGES.map(function (a) {
           return (
-            '<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #bec9c5;border-radius:999px;cursor:pointer;background:#fff">' +
+            '<label class="bb-chip">' +
             '<input type="checkbox" name="age_ranges" value="' +
             escapeHtml(a) +
             '"/>' +
@@ -158,6 +201,88 @@
           );
         }).join("");
       }
+      syncChipStates();
+    }
+
+    function syncChipStates() {
+      Array.from(host.querySelectorAll(".bb-chip")).forEach(function (chip) {
+        var input = chip.querySelector("input");
+        if (!input) return;
+        if (input.checked) chip.classList.add("bb-chip--on");
+        else chip.classList.remove("bb-chip--on");
+      });
+    }
+
+    var previewObjectUrl = null;
+    function setImagePreview(src) {
+      var hostPreview = document.getElementById("bb-image-preview-host");
+      if (!hostPreview) return;
+      if (!src) {
+        hostPreview.innerHTML = '<div class="bb-image-placeholder">معاينة<br/>الصورة</div>';
+        return;
+      }
+      hostPreview.innerHTML =
+        '<img id="bb-prod-image-preview" alt="" src="' +
+        escapeHtml(src) +
+        '" style="width:140px;height:140px;border-radius:14px;object-fit:cover;border:1px solid #e8e1e1;background:#f3ecec" />';
+    }
+
+    function resetImagePreview() {
+      if (previewObjectUrl) {
+        try {
+          URL.revokeObjectURL(previewObjectUrl);
+        } catch (e0) {}
+        previewObjectUrl = null;
+      }
+      setImagePreview("");
+    }
+
+    function wireImageInteractions() {
+      var urlInput = document.getElementById("bb-prod-image");
+      var fileInput = document.getElementById("bb-prod-file");
+      var drop = document.getElementById("bb-image-drop");
+      if (urlInput) {
+        urlInput.addEventListener("input", function () {
+          var v = String(urlInput.value || "").trim();
+          if (v) setImagePreview(v);
+          else if (!fileInput || !fileInput.files || !fileInput.files[0]) resetImagePreview();
+        });
+      }
+      if (fileInput) {
+        fileInput.addEventListener("change", function () {
+          var f = fileInput.files && fileInput.files[0];
+          if (!f) return;
+          if (previewObjectUrl) {
+            try {
+              URL.revokeObjectURL(previewObjectUrl);
+            } catch (e1) {}
+          }
+          previewObjectUrl = URL.createObjectURL(f);
+          setImagePreview(previewObjectUrl);
+        });
+      }
+      if (drop) {
+        ["dragenter", "dragover"].forEach(function (ev) {
+          drop.addEventListener(ev, function (e) {
+            e.preventDefault();
+            drop.classList.add("bb-drop-active");
+          });
+        });
+        ["dragleave", "drop"].forEach(function (ev) {
+          drop.addEventListener(ev, function (e) {
+            e.preventDefault();
+            drop.classList.remove("bb-drop-active");
+          });
+        });
+        drop.addEventListener("drop", function (e) {
+          var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+          if (!f || !fileInput) return;
+          try {
+            fileInput.files = e.dataTransfer.files;
+          } catch (e2) {}
+          fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      }
     }
 
     var msg = host.querySelector("#bbAdminMsg");
@@ -166,6 +291,13 @@
     }
 
     renderOptions();
+    wireImageInteractions();
+
+    host.addEventListener("change", function (e) {
+      var t = e.target;
+      if (!t) return;
+      if (t.name === "colors" || t.name === "age_ranges") syncChipStates();
+    });
 
     var editId = null;
     var submitBtn = null;
@@ -184,10 +316,11 @@
     function clearForm() {
       var formEl = host.querySelector("#bbProdForm");
       if (formEl) formEl.reset();
-      // clear checkboxes
       Array.from(host.querySelectorAll('input[name="colors"], input[name="age_ranges"]')).forEach(function (x) {
         x.checked = false;
       });
+      syncChipStates();
+      resetImagePreview();
       setEditMode(null);
     }
 
@@ -207,18 +340,49 @@
       return document.getElementById("bb-prod-modal");
     }
 
+    function isModalOpen() {
+      var m = modalEl();
+      return !!(m && m.classList.contains("bb-modal-open"));
+    }
+
     function openModal() {
       var m = modalEl();
-      if (m) m.style.display = "flex";
+      if (!m) return;
+      m.style.display = "flex";
+      m.classList.remove("bb-modal-closing");
+      requestAnimationFrame(function () {
+        m.classList.add("bb-modal-open");
+      });
+      try {
+        document.body.style.overflow = "hidden";
+      } catch (e0) {}
       try {
         var t = document.getElementById("bb-prod-title");
-        if (t) t.focus();
+        if (t) setTimeout(function () { t.focus(); }, 120);
       } catch (e) {}
     }
 
     function closeModal() {
       var m = modalEl();
-      if (m) m.style.display = "none";
+      if (!m || !isModalOpen()) {
+        if (m) {
+          m.style.display = "none";
+          m.classList.remove("bb-modal-open", "bb-modal-closing");
+        }
+        try {
+          document.body.style.overflow = "";
+        } catch (e1) {}
+        return;
+      }
+      m.classList.add("bb-modal-closing");
+      m.classList.remove("bb-modal-open");
+      setTimeout(function () {
+        m.style.display = "none";
+        m.classList.remove("bb-modal-closing");
+        try {
+          document.body.style.overflow = "";
+        } catch (e2) {}
+      }, 220);
     }
 
     // Open create modal
@@ -239,6 +403,9 @@
           if (e.target === m) closeModal();
         });
       }
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && isModalOpen()) closeModal();
+      });
     } catch (e5) {}
 
     async function load() {
@@ -356,6 +523,8 @@
       if (desc) desc.value = p.description || "";
       var img = document.getElementById("bb-prod-image");
       if (img) img.value = p.image_url || "";
+      if (p.image_url) setImagePreview(p.image_url);
+      else resetImagePreview();
       // checkboxes
       var cs = Array.isArray(p.colors) ? p.colors : [];
       var as = Array.isArray(p.age_ranges) ? p.age_ranges : [];
@@ -365,6 +534,7 @@
       Array.from(host.querySelectorAll('input[name="age_ranges"]')).forEach(function (x) {
         x.checked = as.indexOf(x.value) !== -1;
       });
+      syncChipStates();
 
       // Load variant stock quantities (color + age_range)
       var vs = await sb
@@ -480,7 +650,7 @@
       function (e) {
         var t = e.target;
         if (!t || (t.name !== "colors" && t.name !== "age_ranges")) return;
-        if (!modalEl() || modalEl().style.display !== "flex") return;
+        if (!isModalOpen()) return;
         renderColorQty({});
       },
       true
@@ -576,6 +746,9 @@
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
       setMsg("");
+      var submitBtnEl = document.getElementById("bb-prod-submit");
+      if (submitBtnEl) submitBtnEl.disabled = true;
+      try {
       function safeExt(name) {
         var m = String(name || "").toLowerCase().match(/\.([a-z0-9]+)$/);
         var ext = m ? m[1] : "jpg";
@@ -697,9 +870,14 @@
         Array.from(host.querySelectorAll('input[name="colors"], input[name="age_ranges"]')).forEach(function (x) {
           x.checked = false;
         });
+        syncChipStates();
+        resetImagePreview();
       }
       await load();
       closeModal();
+      } finally {
+        if (submitBtnEl) submitBtnEl.disabled = false;
+      }
     });
 
     await load();
