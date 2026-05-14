@@ -1,0 +1,97 @@
+/* Scattered BeebBeeb logo watermarks — subtle raindrop-style background */
+body.bb-brand-bg {
+  position: relative;
+}
+
+body.bb-brand-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image:
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png"),
+    url("beebbeeb-logo.png");
+  background-repeat: no-repeat;
+  background-size:
+    64px auto,
+    48px auto,
+    72px auto,
+    52px auto,
+    58px auto,
+    44px auto,
+    68px auto,
+    50px auto,
+    76px auto,
+    42px auto,
+    60px auto,
+    54px auto,
+    70px auto,
+    46px auto,
+    62px auto,
+    56px auto,
+    48px auto,
+    66px auto;
+  background-position:
+    6% 8%,
+    19% 22%,
+    34% 6%,
+    51% 18%,
+    67% 9%,
+    84% 20%,
+    94% 7%,
+    8% 41%,
+    24% 53%,
+    41% 37%,
+    58% 49%,
+    73% 38%,
+    88% 52%,
+    12% 74%,
+    29% 86%,
+    47% 71%,
+    63% 88%,
+    81% 76%,
+    93% 68%;
+}
+
+@media (max-width: 640px) {
+  body.bb-brand-bg::before {
+    opacity: 0.032;
+    background-size:
+      44px auto,
+      36px auto,
+      50px auto,
+      38px auto,
+      42px auto,
+      32px auto,
+      48px auto,
+      34px auto,
+      52px auto,
+      30px auto,
+      40px auto,
+      36px auto,
+      46px auto,
+      32px auto,
+      42px auto,
+      38px auto,
+      34px auto,
+      44px auto;
+  }
+}

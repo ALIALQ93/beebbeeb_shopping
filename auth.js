@@ -599,7 +599,21 @@
   // Backward-compat alias used by some admin pages
   window.BB.logout = adminLogout;
 
+  function wireBrandWatermark() {
+    try {
+      if (!document.querySelector("link[data-bb-brand-watermark]")) {
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "assets/brand-watermark.css";
+        link.setAttribute("data-bb-brand-watermark", "1");
+        document.head.appendChild(link);
+      }
+      if (document.body) document.body.classList.add("bb-brand-bg");
+    } catch (e) {}
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    wireBrandWatermark();
     applyLang();
     wireLangSelect();
     wireLogin().catch(function () {});
