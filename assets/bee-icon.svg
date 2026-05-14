@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <ellipse cx="19" cy="30" rx="11" ry="15" fill="#86d2c1" opacity="0.9"/>
+  <ellipse cx="45" cy="30" rx="11" ry="15" fill="#86d2c1" opacity="0.9"/>
+  <ellipse cx="32" cy="36" rx="15" ry="17" fill="#FACC15"/>
+  <rect x="17" y="31" width="30" height="4.5" rx="2.25" fill="#3f4946" opacity="0.55"/>
+  <rect x="17" y="39" width="30" height="4.5" rx="2.25" fill="#3f4946" opacity="0.55"/>
+  <circle cx="32" cy="21" r="12" fill="#FDE68A"/>
+  <circle cx="27.5" cy="20" r="2.6" fill="#1d1b1b"/>
+  <circle cx="36.5" cy="20" r="2.6" fill="#1d1b1b"/>
+  <circle cx="28.5" cy="19" r="0.9" fill="#fff"/>
+  <circle cx="37.5" cy="19" r="0.9" fill="#fff"/>
+  <path d="M28 28c2 2 6 2 8 0" stroke="#1d1b1b" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M25 10c-2-5-6-7-9-7" stroke="#3f4946" stroke-width="2" stroke-linecap="round"/>
+  <path d="M39 10c2-5 6-7 9-7" stroke="#3f4946" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="16" cy="3" r="2.8" fill="#FB923C"/>
+  <circle cx="48" cy="3" r="2.8" fill="#FB923C"/>
+  <ellipse cx="32" cy="49" rx="5" ry="3" fill="#1d1b1b" opacity="0.12"/>
+</svg>

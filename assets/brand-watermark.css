@@ -1,6 +1,7 @@
-/* Scattered bee mascot watermarks — subtle raindrop-style background */
+/* Scattered bee icon watermarks — raindrop-style background (SVG, no raster image) */
 body.bb-brand-bg {
   position: relative;
+  --bb-bee-icon: url("bee-icon.svg");
 }
 
 body.bb-brand-bg::before {
@@ -9,47 +10,46 @@ body.bb-brand-bg::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.07;
-  mix-blend-mode: screen;
+  opacity: 0.11;
   background-image:
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png"),
-    url("beebbeeb-bee.png");
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon),
+    var(--bb-bee-icon);
   background-repeat: no-repeat;
   background-size:
-    52px auto,
-    38px auto,
-    60px auto,
-    44px auto,
     48px auto,
     34px auto,
     56px auto,
     40px auto,
-    64px auto,
+    44px auto,
+    30px auto,
+    52px auto,
     36px auto,
-    50px auto,
-    42px auto,
     58px auto,
+    32px auto,
+    46px auto,
     38px auto,
     54px auto,
-    46px auto,
-    40px auto,
-    56px auto;
+    34px auto,
+    50px auto,
+    42px auto,
+    36px auto,
+    52px auto;
   background-position:
     6% 8%,
     19% 22%,
@@ -74,25 +74,25 @@ body.bb-brand-bg::before {
 
 @media (max-width: 640px) {
   body.bb-brand-bg::before {
-    opacity: 0.055;
+    opacity: 0.085;
     background-size:
-      36px auto,
+      32px auto,
+      24px auto,
+      38px auto,
       28px auto,
-      42px auto,
       30px auto,
-      34px auto,
+      22px auto,
+      36px auto,
       26px auto,
       40px auto,
-      28px auto,
-      44px auto,
-      24px auto,
-      32px auto,
+      20px auto,
       30px auto,
-      38px auto,
       26px auto,
       34px auto,
-      30px auto,
+      22px auto,
+      32px auto,
       28px auto,
-      36px auto;
+      24px auto,
+      32px auto;
   }
 }
