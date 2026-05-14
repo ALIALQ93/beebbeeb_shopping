@@ -113,16 +113,6 @@
     if (shipEl) shipEl.textContent = fmtIQD(shipping);
     var totalEl = document.getElementById("bb-summary-total");
     if (totalEl) totalEl.textContent = fmtIQD(total);
-
-    var usdEl = document.getElementById("bb-summary-usd");
-    if (usdEl) {
-      var rate = Number(localStorage.getItem("bb_usd_rate") || "0");
-      if (rate > 0) {
-        usdEl.textContent = "~$" + (total / rate).toFixed(2);
-      } else {
-        usdEl.textContent = "";
-      }
-    }
   }
 
   function itemRow(item) {

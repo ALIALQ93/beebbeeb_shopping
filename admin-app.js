@@ -20,8 +20,6 @@
     if (!ok) return;
     var sb = await window.BB.getSupabase();
     var BUCKET = "product-images";
-    var SETTINGS_KEY = "usd_iqd_rate";
-
     var COLORS = [
       { v: "Mint", hex: "#86D2C1" },
       { v: "Pink", hex: "#FFD1DC" },
@@ -50,14 +48,6 @@
       return x;
     }
 
-    function fmtUSDFromIQD(iqd, rate) {
-      var r = Number(rate || 0);
-      if (!Number.isFinite(r) || r <= 0) return "";
-      var usd = Number(iqd || 0) / r;
-      if (!Number.isFinite(usd)) return "";
-      return "$" + usd.toFixed(2);
-    }
-
     var mount =
       document.getElementById("bb-admin-products") || document.body;
     var host = document.createElement("div");
@@ -83,13 +73,6 @@
       '<button data-bb-logout style="background:#146a5c;color:#fff;border:0;border-radius:10px;padding:10px 12px;font-weight:800;cursor:pointer">Logout</button>' +
       "</div>" +
       "</div>" +
-      '<div style="background:#fff;border:1px solid #e8e1e1;border-radius:14px;padding:12px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">' +
-      '<div style="font-weight:800">سعر الصرف</div>' +
-      '<div style="color:#3f4946;font-size:12px">IQD لكل 1 USD</div>' +
-      '<input id="bb-usd-rate" type="number" min="1" step="1" style="padding:10px 12px;border:1px solid #bec9c5;border-radius:10px;width:160px" placeholder="مثال: 1300" dir="ltr">' +
-      '<button id="bb-usd-save" type="button" style="background:#146a5c;color:#fff;border:0;border-radius:10px;padding:10px 12px;font-weight:800;cursor:pointer">حفظ</button>' +
-      '<span id="bb-usd-msg" style="font-size:12px;color:#3f4946"></span>' +
-      "</div>" +
       '<div id="bbAdminMsg" style="margin:6px 0 10px;font-size:13px;color:#ba1a1a;min-height:18px"></div>' +
       '<div style="background:#fff;border:1px solid #e8e1e1;border-radius:14px;overflow:auto">' +
       '<table style="width:100%;border-collapse:collapse">' +
@@ -97,7 +80,6 @@
       '<th style="text-align:left;padding:10px">Image</th>' +
       '<th style="text-align:left;padding:10px">Title</th>' +
       '<th style="text-align:right;padding:10px">IQD</th>' +
-      '<th style="text-align:right;padding:10px">USD</th>' +
       '<th style="text-align:right;padding:10px">Stock</th>' +
       '<th style="text-align:right;padding:10px">Colors</th>' +
       '<th style="text-align:right;padding:10px">Active</th>' +
@@ -187,7 +169,6 @@
 
     var editId = null;
     var submitBtn = null;
-    var usdRate = null;
     var origVariantStock = {}; // key: color||age -> stock (used in edit mode)
 
     function setEditMode(id) {
@@ -260,41 +241,6 @@
       }
     } catch (e5) {}
 
-    async function loadUsdRate() {
-      try {
-        var r = await sb.from("app_settings").select("value").eq("key", SETTINGS_KEY).maybeSingle();
-        if (r.error) return;
-        var el = document.getElementById("bb-usd-rate");
-        if (r.data && r.data.value) {
-          usdRate = Number(r.data.value);
-          if (el) el.value = String(r.data.value);
-        }
-      } catch (e) {}
-    }
-
-    async function saveUsdRate() {
-      var el = document.getElementById("bb-usd-rate");
-      var out = document.getElementById("bb-usd-msg");
-      if (!el) return;
-      var n = parseInt(String(el.value || "0"), 10);
-      if (!Number.isFinite(n) || n <= 0) {
-        if (out) out.textContent = "رقم غير صحيح";
-        return;
-      }
-      if (out) out.textContent = "جارِ الحفظ...";
-      var res = await sb
-        .from("app_settings")
-        .upsert({ key: SETTINGS_KEY, value: String(n), updated_at: new Date().toISOString() });
-      if (res.error) {
-        if (out) out.textContent = res.error.message;
-        return;
-      }
-      usdRate = Number(n);
-      if (out) out.textContent = "تم الحفظ";
-      // refresh table so USD column updates
-      await load();
-    }
-
     async function load() {
       setMsg("");
       var res = await sb
@@ -340,7 +286,6 @@
         var dp = clampInt(p.discount_percent, 0, 90);
         var base = Number(p.price_iqd || 0);
         var finalIQD = dp > 0 ? Math.max(0, Math.round(base * (100 - dp) / 100)) : base;
-        var usd = fmtUSDFromIQD(finalIQD, usdRate);
         var colorsObj = stockMap[p.id] || {};
         var colorsText = Object.keys(colorsObj).length
           ? Object.keys(colorsObj)
@@ -363,9 +308,6 @@
           "</td>" +
           '<td style="padding:10px;border-top:1px solid #eee;text-align:right">' +
           escapeHtml(String(finalIQD)) +
-          "</td>" +
-          '<td style="padding:10px;border-top:1px solid #eee;text-align:right;font-family:ui-monospace,Consolas,monospace" dir="ltr">' +
-          escapeHtml(usd || "") +
           "</td>" +
           '<td style="padding:10px;border-top:1px solid #eee;text-align:right">' +
           (p.stock ?? "") +
@@ -760,12 +702,7 @@
       closeModal();
     });
 
-    await loadUsdRate();
     await load();
-    try {
-      var s = document.getElementById("bb-usd-save");
-      if (s) s.addEventListener("click", saveUsdRate);
-    } catch (e4) {}
   }
 
   document.addEventListener("DOMContentLoaded", function () {

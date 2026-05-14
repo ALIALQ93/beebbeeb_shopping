@@ -1,6 +1,5 @@
 // Product page: load product by ?id=... from Supabase and render.
 (function () {
-  var __usdRate = null;
   var __selectedColor = null;
   var __selectedAge = null;
   var __variantStock = {}; // color -> age -> stock
@@ -19,36 +18,6 @@
     } catch {
       return String(n || 0) + " IQD";
     }
-  }
-
-  function fmtUSDFromIQD(iqd, rate) {
-    var r = Number(rate || 0);
-    if (!Number.isFinite(r) || r <= 0) return "";
-    var usd = Number(iqd || 0) / r;
-    if (!Number.isFinite(usd)) return "";
-    return "$" + usd.toFixed(2);
-  }
-
-  async function getUsdRate(sb) {
-    if (__usdRate != null) return __usdRate;
-    try {
-      var cached = localStorage.getItem("bb_usd_rate");
-      if (cached) __usdRate = Number(cached);
-    } catch (e) {}
-    try {
-      var res = await sb
-        .from("app_settings")
-        .select("value")
-        .eq("key", "usd_iqd_rate")
-        .maybeSingle();
-      if (!res.error && res.data && res.data.value) {
-        __usdRate = Number(res.data.value);
-        try {
-          localStorage.setItem("bb_usd_rate", String(__usdRate));
-        } catch (e2) {}
-      }
-    } catch (e3) {}
-    return __usdRate;
   }
 
   function getCart() {
@@ -245,9 +214,7 @@
     if (titleEnEl) titleEnEl.textContent = p.title_en || "";
     if (priceEl) {
       var now = p.final_price_iqd != null ? p.final_price_iqd : p.price_iqd;
-      var rate = await getUsdRate(sb);
-      var usd = fmtUSDFromIQD(now, rate);
-      priceEl.textContent = fmtIQD(now) + (usd ? " · " + usd + " USD" : "");
+      priceEl.textContent = fmtIQD(now);
     }
     if (descEl) descEl.textContent = p.description || descEl.textContent || "";
     if (imgEl && p.image_url) imgEl.src = p.image_url;

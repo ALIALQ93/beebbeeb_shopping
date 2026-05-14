@@ -1,6 +1,5 @@
 // Home page: fetch active products from Supabase and render into "New Arrivals".
 (function () {
-  var __usdRate = null;
   var AGE_CHOICES = ["0-3M","3-6M","6-12M","12-18M","18-24M","2-3Y","3-4Y","4-5Y","5-6Y","6-7Y","7-8Y","8-12Y"];
 
   function fmtIQD(n) {
@@ -9,36 +8,6 @@
     } catch {
       return String(n || 0) + " IQD";
     }
-  }
-
-  function fmtUSDFromIQD(iqd, rate) {
-    var r = Number(rate || 0);
-    if (!Number.isFinite(r) || r <= 0) return "";
-    var usd = Number(iqd || 0) / r;
-    if (!Number.isFinite(usd)) return "";
-    return "$" + usd.toFixed(2);
-  }
-
-  async function getUsdRate(sb) {
-    if (__usdRate != null) return __usdRate;
-    try {
-      var cached = localStorage.getItem("bb_usd_rate");
-      if (cached) __usdRate = Number(cached);
-    } catch (e) {}
-    try {
-      var res = await sb
-        .from("app_settings")
-        .select("value")
-        .eq("key", "usd_iqd_rate")
-        .maybeSingle();
-      if (!res.error && res.data && res.data.value) {
-        __usdRate = Number(res.data.value);
-        try {
-          localStorage.setItem("bb_usd_rate", String(__usdRate));
-        } catch (e2) {}
-      }
-    } catch (e3) {}
-    return __usdRate;
   }
 
   function escapeHtml(s) {
@@ -144,7 +113,6 @@
           "%</span>"
         : "";
 
-    var usd = fmtUSDFromIQD(priceNow, p.__usdRate);
     var titleEn = (p.title_en || "").trim();
     var lang = (window.BB && window.BB.getLang) ? window.BB.getLang() : "ar";
     var addTxt = lang === "en" ? "Add to cart" : "إضافة للسلة";
@@ -169,11 +137,6 @@
       escapeHtml(fmtIQD(priceNow)) +
       priceHtml +
       "</p>" +
-      (usd
-        ? '<p class="text-xs text-on-surface-variant" dir="ltr">' +
-          escapeHtml(usd) +
-          " USD</p>"
-        : "") +
       '<button data-bb-add-to-cart="' +
       escapeHtml(p.id) +
       '" class="w-full mt-3 py-2 bg-secondary-container text-on-secondary-container rounded-xl text-xs font-bold hover:bg-secondary transition-colors">' +
@@ -204,7 +167,6 @@
           "%</span>"
         : "";
 
-    var usd = fmtUSDFromIQD(priceNow, p.__usdRate);
     var titleEn = (p.title_en || "").trim();
     var lang = (window.BB && window.BB.getLang) ? window.BB.getLang() : "ar";
     var addTxt = lang === "en" ? "Add to cart" : "إضافة للسلة";
@@ -234,11 +196,6 @@
       "</span>" +
       priceHtml +
       "</div>" +
-      (usd
-        ? '<div class="text-xs text-on-surface-variant mb-2" dir="ltr">' +
-          escapeHtml(usd) +
-          " USD</div>"
-        : "") +
       '<button data-bb-add-to-cart="' +
       escapeHtml(p.id) +
       '" class="w-full mt-3 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:opacity-90 transition-colors">' +
@@ -289,7 +246,6 @@
     }
 
     var products = res.data || [];
-    var rate = await getUsdRate(sb);
 
     // Customer session pill
     try {
@@ -374,7 +330,6 @@
     products.forEach(function (p, idx) {
       var dp = Number(p.discount_percent || 0);
       if (dp > 0) p.final_price_iqd = Math.max(0, Math.round(Number(p.price_iqd || 0) * (100 - dp) / 100));
-      p.__usdRate = rate;
       html += idx === 0 ? cardFeature(p) : cardSmall(p);
     });
     grid.innerHTML = html;
