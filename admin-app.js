@@ -95,6 +95,34 @@
       ".bb-btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}" +
       ".bb-btn-secondary{background:#f3ecec;color:#1d1b1b}" +
       ".bb-btn-secondary:hover{background:#e8e1e1}" +
+      ".bb-variant-section{margin-top:0}" +
+      ".bb-variant-hint{margin:0 0 12px;font-size:12px;color:#6f7976;line-height:1.5}" +
+      ".bb-variant-empty{padding:18px 14px;border:1.5px dashed #d7e2de;border-radius:14px;background:#f7fbfa;color:#3f4946;font-size:13px;text-align:center}" +
+      ".bb-variant-table-wrap{overflow:auto;border:1px solid #e8e1e1;border-radius:14px;background:#fff;max-height:320px}" +
+      ".bb-variant-table{width:100%;border-collapse:separate;border-spacing:0;min-width:640px}" +
+      ".bb-variant-table thead th{position:sticky;top:0;z-index:2;background:#f3ecec;color:#3f4946;font-size:11px;font-weight:900;padding:10px 8px;border-bottom:1px solid #e8e1e1;white-space:nowrap}" +
+      ".bb-variant-table thead th:first-child{left:0;z-index:3;text-align:right;min-width:120px}" +
+      ".bb-variant-table tbody td{padding:8px;border-top:1px solid #f0ecec;vertical-align:middle}" +
+      ".bb-variant-color-cell{position:sticky;left:0;z-index:1;background:#fff;font-weight:900;min-width:120px}" +
+      ".bb-variant-color-cell-inner{display:flex;align-items:center;gap:8px;justify-content:flex-end}" +
+      ".bb-variant-age-head{text-align:center}" +
+      ".bb-qty-cell{text-align:center}" +
+      ".bb-qty-stepper{display:inline-flex;align-items:center;justify-content:center;gap:4px}" +
+      ".bb-qty-btn{min-width:34px;height:34px;padding:0 8px;border:1px solid #bec9c5;border-radius:10px;background:#fff;color:#1d1b1b;font-weight:900;cursor:pointer;transition:background .12s ease,border-color .12s ease,transform .12s ease}" +
+      ".bb-qty-btn:hover{background:#f3ecec;border-color:#86d2c1}" +
+      ".bb-qty-btn:active{transform:scale(.96)}" +
+      ".bb-qty-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}" +
+      ".bb-qty-btn-inc{background:#e8f7f3;border-color:#86d2c1;color:#146a5c}" +
+      ".bb-qty-input{width:64px;height:34px;text-align:center;padding:0 6px;border:1px solid #bec9c5;border-radius:10px;font-weight:800;background:#fff}" +
+      ".bb-qty-input[readonly]{background:#f3ecec;color:#6f7976}" +
+      ".bb-qty-input:focus{outline:none;border-color:#86d2c1;box-shadow:0 0 0 3px rgba(134,210,193,.24)}" +
+      ".bb-variant-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;background:#f3ecec}" +
+      ".bb-variant-summary strong{font-size:14px;color:#146a5c}" +
+      "@media (max-width: 640px) {" +
+      "  .bb-variant-table-wrap{max-height:260px}" +
+      "  .bb-qty-input{width:52px}" +
+      "  .bb-qty-btn{min-width:30px;height:30px}" +
+      "}" +
       "@media (max-width: 980px) {" +
       "  .bb-form-grid{grid-template-columns:1fr 1fr}" +
       "  .bb-field-span2,.bb-field-span4{grid-column:1 / -1}" +
@@ -157,8 +185,13 @@
       '<section class="bb-form-section"><h4 class="bb-form-section-title">الألوان والمقاسات</h4>' +
       '<div class="bb-form-grid">' +
       '<div class="bb-field bb-field-span2"><label>الألوان</label><div id="bb-colors" class="bb-chip-grid"></div></div>' +
-      '<div class="bb-field bb-field-span2"><label>الأعمار / المقاسات</label><div id="bb-ages" class="bb-chip-grid"></div>' +
+      '<div class="bb-field bb-field-span2"><label>الأعمار / المقاسات</label><div id="bb-ages" class="bb-chip-grid"></div></div>' +
       "</div></section>" +
+      '<section class="bb-form-section bb-variant-section" id="bb-variant-qty-section">' +
+      '<h4 class="bb-form-section-title">كميات المخزون حسب اللون والمقاس</h4>' +
+      '<p class="bb-variant-hint" id="bb-variant-qty-hint">اختر لونًا واحدًا على الأقل ومقاسًا واحدًا على الأقل لإظهار جدول الكميات.</p>' +
+      '<div id="bb-variant-qty-host"></div>' +
+      "</section>" +
       "</form></div>" +
       '<div class="bb-modal-foot">' +
       '<button id="bb-edit-cancel" type="button" class="bb-btn bb-btn-secondary" style="display:none">إلغاء</button>' +
@@ -321,6 +354,7 @@
       });
       syncChipStates();
       resetImagePreview();
+      renderColorQty({});
       setEditMode(null);
     }
 
@@ -554,17 +588,64 @@
       openModal();
     }
 
-    // (Kept name for compatibility) Renders variant stock matrix.
+    function colorHex(name) {
+      var hit = COLORS.find(function (c) { return c.v === name; });
+      return hit ? hit.hex : "#e8e1e1";
+    }
+
+    function readVariantQtyMap() {
+      var map = {};
+      Array.from(host.querySelectorAll("[data-variant-qty]")).forEach(function (inp) {
+        var k = inp.getAttribute("data-variant-qty") || "";
+        if (!k) return;
+        map[k] = clampInt(inp.value, 0);
+      });
+      return map;
+    }
+
+    function updateVariantStockTotal() {
+      var stockEl = document.getElementById("bb-prod-stock");
+      if (!stockEl) return;
+      var sum = 0;
+      Array.from(host.querySelectorAll("[data-variant-qty]")).forEach(function (inp) {
+        sum += clampInt(inp.value, 0);
+      });
+      stockEl.value = String(sum);
+      var summary = document.getElementById("bb-variant-qty-summary");
+      if (summary) summary.textContent = "إجمالي القطع: " + String(sum);
+    }
+
+    function setVariantQtyValue(key, next) {
+      var inp = host.querySelector('[data-variant-qty="' + key + '"]');
+      if (!inp || inp.readOnly) return;
+      inp.value = String(clampInt(next, 0));
+      updateVariantStockTotal();
+    }
+
+    function wireVariantQtyInteractions(box) {
+      if (!box) return;
+      box.addEventListener("click", function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest("button[data-vqty-step]") : null;
+        if (!btn) return;
+        var key = btn.getAttribute("data-vkey") || "";
+        var step = clampInt(btn.getAttribute("data-vqty-step"), 0) || 0;
+        if (!key || !step) return;
+        var inp = host.querySelector('[data-variant-qty="' + key + '"]');
+        if (!inp || inp.readOnly) return;
+        setVariantQtyValue(key, clampInt(inp.value, 0) + step);
+      });
+      box.addEventListener("input", function (e) {
+        var t = e.target;
+        if (!t || !t.hasAttribute("data-variant-qty")) return;
+        updateVariantStockTotal();
+      });
+    }
+
     function renderColorQty(existing) {
-      var wrap = document.getElementById("bb-colors");
-      if (!wrap) return;
-      var blockId = "bb-color-qty";
-      var old = document.getElementById(blockId);
-      if (old) old.remove();
-      var box = document.createElement("div");
-      box.id = blockId;
-      box.style.cssText =
-        "width:100%;margin-top:10px;border-top:1px dashed #e8e1e1;padding-top:10px;display:flex;flex-direction:column;gap:10px";
+      var hostBox = document.getElementById("bb-variant-qty-host");
+      var hint = document.getElementById("bb-variant-qty-hint");
+      if (!hostBox) return;
+      hostBox.innerHTML = "";
 
       var selectedColors = Array.from(host.querySelectorAll('input[name="colors"]'))
         .filter(function (x) { return x.checked; })
@@ -573,75 +654,100 @@
         .filter(function (x) { return x.checked; })
         .map(function (x) { return x.value; });
 
-      if (!selectedColors.length || !selectedAges.length) {
-        box.innerHTML =
-          '<div style="color:#3f4946;font-size:12px">اختر لونًا + عمر/مقاس لعرض جدول الكميات.</div>';
-        wrap.parentNode.appendChild(box);
+      if (!selectedColors.length && !selectedAges.length) {
+        if (hint) hint.textContent = "اختر لونًا واحدًا على الأقل ومقاسًا واحدًا على الأقل لإظهار جدول الكميات.";
+        hostBox.innerHTML = '<div class="bb-variant-empty">لم يتم اختيار ألوان أو مقاسات بعد.</div>';
+        updateVariantStockTotal();
         return;
       }
-      var isEdit = !!editId;
-      box.innerHTML =
-        (isEdit
-          ? '<div style="color:#3f4946;font-size:12px">في التعديل: لا يمكن إنقاص/تغيير الرصيد الحالي، فقط إضافة (+) على مستوى (اللون + العمر).</div>'
-          : '<div style="color:#3f4946;font-size:12px">حدد الكمية المبدئية لكل (لون + عمر).</div>') +
-        '<div style="overflow:auto;border:1px solid #e8e1e1;border-radius:12px">' +
-        '<table style="width:100%;border-collapse:collapse;min-width:720px">' +
-        '<thead><tr style="background:#f9f2f2">' +
-        '<th style="text-align:left;padding:8px 10px;border-bottom:1px solid #eee">Color \\ Age</th>' +
-        selectedAges
-          .slice()
-          .sort()
-          .map(function (a) {
-            return '<th style="text-align:center;padding:8px 10px;border-bottom:1px solid #eee">' + escapeHtml(a) + "</th>";
-          })
-          .join("") +
-        "</tr></thead><tbody>" +
-        selectedColors
-          .slice()
-          .sort()
-          .map(function (c) {
-            return (
-              "<tr>" +
-              '<td style="padding:8px 10px;border-top:1px solid #eee;font-weight:900">' +
-              escapeHtml(c) +
-              "</td>" +
-              selectedAges
-                .slice()
-                .sort()
-                .map(function (a) {
-                  var key = String(c) + "||" + String(a);
-                  var val = clampInt(existing && existing[key] != null ? existing[key] : 0, 0);
-                  return (
-                    '<td style="padding:8px 10px;border-top:1px solid #eee;text-align:center">' +
-                    '<div style="display:flex;align-items:center;justify-content:center;gap:6px">' +
-                    '<input data-variant-qty="' +
-                    escapeHtml(key) +
-                    '" type="number" min="0" value="' +
-                    escapeHtml(String(val)) +
-                    '" style="width:96px;text-align:center;padding:8px 10px;border-radius:10px;border:1px solid #bec9c5' +
-                    (isEdit ? ';background:#f3ecec' : "") +
-                    '" ' +
-                    (isEdit ? "readonly" : "") +
-                    " />" +
-                    (isEdit
-                      ? '<button type="button" data-vinc="1" data-vkey="' +
-                        escapeHtml(key) +
-                        '" style="padding:6px 10px;border-radius:10px;border:1px solid #bec9c5;background:#fff;cursor:pointer">+1</button>' +
-                        '<button type="button" data-vinc="5" data-vkey="' +
-                        escapeHtml(key) +
-                        '" style="padding:6px 10px;border-radius:10px;border:1px solid #bec9c5;background:#fff;cursor:pointer">+5</button>'
-                      : "") +
-                    "</div></td>"
-                  );
-                })
-                .join("") +
-              "</tr>"
-            );
-          })
-          .join("") +
-        "</tbody></table></div>";
+      if (!selectedColors.length || !selectedAges.length) {
+        if (hint) {
+          hint.textContent = !selectedColors.length
+            ? "اختر لونًا واحدًا على الأقل لإكمال جدول الكميات."
+            : "اختر مقاسًا واحدًا على الأقل لإكمال جدول الكميات.";
+        }
+        hostBox.innerHTML =
+          '<div class="bb-variant-empty">' +
+          (!selectedColors.length ? "الخطوة التالية: اختر الألوان." : "الخطوة التالية: اختر الأعمار / المقاسات.") +
+          "</div>";
+        updateVariantStockTotal();
+        return;
+      }
 
-      wrap.parentNode.appendChild(box);
+      var isEdit = !!editId;
+      if (hint) {
+        hint.textContent = isEdit
+          ? "في وضع التعديل يمكنك إضافة كميات فقط عبر أزرار +1 و +5 لكل تركيبة (لون + مقاس)."
+          : "حدد الكمية لكل تركيبة (لون + مقاس). يمكنك استخدام أزرار + و - أو الكتابة مباشرة.";
+      }
+
+      var ages = selectedAges.slice().sort();
+      var colors = selectedColors.slice().sort();
+      var tableHead =
+        '<div class="bb-variant-table-wrap"><table class="bb-variant-table"><thead><tr>' +
+        '<th>اللون \\ المقاس</th>' +
+        ages
+          .map(function (a) {
+            return '<th class="bb-variant-age-head">' + escapeHtml(a) + "</th>";
+          })
+          .join("") +
+        "</tr></thead><tbody>";
+
+      var tableBody = colors
+        .map(function (c) {
+          var hex = colorHex(c);
+          return (
+            "<tr>" +
+            '<td class="bb-variant-color-cell"><div class="bb-variant-color-cell-inner">' +
+            '<span class="bb-chip-swatch" style="background:' +
+            escapeHtml(hex) +
+            '"></span><span>' +
+            escapeHtml(c) +
+            "</span></div></td>" +
+            ages
+              .map(function (a) {
+                var key = String(c) + "||" + String(a);
+                var val = clampInt(existing && existing[key] != null ? existing[key] : 0, 0);
+                var stepper =
+                  '<div class="bb-qty-stepper">' +
+                  (isEdit
+                    ? ""
+                    : '<button type="button" class="bb-qty-btn" data-vqty-step="-1" data-vkey="' +
+                      escapeHtml(key) +
+                      '">−</button>') +
+                  '<input data-variant-qty="' +
+                  escapeHtml(key) +
+                  '" class="bb-qty-input" type="number" min="0" value="' +
+                  escapeHtml(String(val)) +
+                  '"' +
+                  (isEdit ? " readonly" : "") +
+                  " />" +
+                  (isEdit
+                    ? '<button type="button" class="bb-qty-btn bb-qty-btn-inc" data-vinc="1" data-vkey="' +
+                      escapeHtml(key) +
+                      '">+1</button><button type="button" class="bb-qty-btn bb-qty-btn-inc" data-vinc="5" data-vkey="' +
+                      escapeHtml(key) +
+                      '">+5</button>'
+                    : '<button type="button" class="bb-qty-btn" data-vqty-step="1" data-vkey="' +
+                      escapeHtml(key) +
+                      '">+</button>') +
+                  "</div>";
+                return '<td class="bb-qty-cell">' + stepper + "</td>";
+              })
+              .join("") +
+            "</tr>"
+          );
+        })
+        .join("");
+
+      hostBox.innerHTML =
+        tableHead +
+        tableBody +
+        "</tbody></table></div>" +
+        '<div class="bb-variant-summary"><span>مجموع المخزون لهذا المنتج</span><strong id="bb-variant-qty-summary">إجمالي القطع: 0</strong></div>';
+
+      wireVariantQtyInteractions(hostBox);
+      updateVariantStockTotal();
     }
 
     // Keep qty controls in sync with selected colors/ages
@@ -651,7 +757,7 @@
         var t = e.target;
         if (!t || (t.name !== "colors" && t.name !== "age_ranges")) return;
         if (!isModalOpen()) return;
-        renderColorQty({});
+        renderColorQty(readVariantQtyMap());
       },
       true
     );
