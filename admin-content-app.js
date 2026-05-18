@@ -47,6 +47,9 @@
       "help_subtitle_en",
       "help_whatsapp_url",
       "help_call_phone",
+      "callmebot_enabled",
+      "callmebot_phone",
+      "callmebot_apikey",
     ];
     var map = await readSettings(sb, keys);
     (document.getElementById("bb-hero-badge-ar") || {}).value = map.home_hero_badge_ar || "";
@@ -70,6 +73,13 @@
     (document.getElementById("bb-help-sub-en") || {}).value = map.help_subtitle_en || "";
     (document.getElementById("bb-help-whatsapp") || {}).value = map.help_whatsapp_url || "";
     (document.getElementById("bb-help-call") || {}).value = map.help_call_phone || "";
+    var enabledEl = document.getElementById("bb-callmebot-enabled");
+    if (enabledEl) {
+      var en = map.callmebot_enabled || "0";
+      enabledEl.checked = en === "1" || en === "true" || en === "yes" || en === "on";
+    }
+    (document.getElementById("bb-callmebot-phone") || {}).value = map.callmebot_phone || "";
+    (document.getElementById("bb-callmebot-apikey") || {}).value = map.callmebot_apikey || "";
   }
 
   async function save() {
@@ -100,6 +110,21 @@
       { key: "help_whatsapp_url", el: "bb-help-whatsapp" },
       { key: "help_call_phone", el: "bb-help-call" },
     ];
+
+    var enabledEl = document.getElementById("bb-callmebot-enabled");
+    var callmebotRows = [
+      { key: "callmebot_enabled", value: enabledEl && enabledEl.checked ? "1" : "0" },
+      { key: "callmebot_phone", el: "bb-callmebot-phone" },
+      { key: "callmebot_apikey", el: "bb-callmebot-apikey" },
+    ];
+    for (var c = 0; c < callmebotRows.length; c++) {
+      var row = callmebotRows[c];
+      var val = row.el
+        ? (document.getElementById(row.el)?.value || "").trim()
+        : row.value;
+      var cu = await upsertSetting(sb, row.key, val);
+      if (cu.error) throw cu.error;
+    }
 
     for (var i = 0; i < rows.length; i++) {
       var val = (document.getElementById(rows[i].el)?.value || "").trim();
@@ -147,6 +172,15 @@
     setMsg("Uploaded.");
   }
 
+  async function testCallMeBot() {
+    setMsg("");
+    await window.BB.requireAdmin();
+    var sb = await window.BB.getSupabase();
+    var r = await sb.rpc("admin_test_order_whatsapp");
+    if (r.error) throw r.error;
+    setMsg(r.data || "Test sent.");
+  }
+
   function bind() {
     var saveBtn = document.getElementById("bb-content-save");
     if (saveBtn) saveBtn.addEventListener("click", function () { save().catch(function (e) { setMsg(e.message || String(e)); }); });
@@ -154,6 +188,14 @@
     if (reloadBtn) reloadBtn.addEventListener("click", function () { load().catch(function (e) { setMsg(e.message || String(e)); }); });
     var uploadBtn = document.getElementById("bb-hero-img-upload");
     if (uploadBtn) uploadBtn.addEventListener("click", function () { uploadHeroImage().catch(function (e) { setMsg(e.message || String(e)); }); });
+    var testBtn = document.getElementById("bb-callmebot-test");
+    if (testBtn) {
+      testBtn.addEventListener("click", function () {
+        save()
+          .then(function () { return testCallMeBot(); })
+          .catch(function (e) { setMsg(e.message || String(e)); });
+      });
+    }
 
     var logout = document.getElementById("bb-logout");
     if (logout) {
