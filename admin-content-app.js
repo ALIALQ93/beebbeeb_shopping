@@ -50,6 +50,9 @@
       "callmebot_enabled",
       "callmebot_phone",
       "callmebot_apikey",
+      "callmebot_signal_enabled",
+      "callmebot_signal_phone",
+      "callmebot_signal_apikey",
     ];
     var map = await readSettings(sb, keys);
     (document.getElementById("bb-hero-badge-ar") || {}).value = map.home_hero_badge_ar || "";
@@ -80,6 +83,13 @@
     }
     (document.getElementById("bb-callmebot-phone") || {}).value = map.callmebot_phone || "";
     (document.getElementById("bb-callmebot-apikey") || {}).value = map.callmebot_apikey || "";
+    var signalEnabledEl = document.getElementById("bb-callmebot-signal-enabled");
+    if (signalEnabledEl) {
+      var sen = map.callmebot_signal_enabled || "0";
+      signalEnabledEl.checked = sen === "1" || sen === "true" || sen === "yes" || sen === "on";
+    }
+    (document.getElementById("bb-callmebot-signal-phone") || {}).value = map.callmebot_signal_phone || "";
+    (document.getElementById("bb-callmebot-signal-apikey") || {}).value = map.callmebot_signal_apikey || "";
   }
 
   async function save() {
@@ -112,10 +122,14 @@
     ];
 
     var enabledEl = document.getElementById("bb-callmebot-enabled");
+    var signalEnabledEl = document.getElementById("bb-callmebot-signal-enabled");
     var callmebotRows = [
       { key: "callmebot_enabled", value: enabledEl && enabledEl.checked ? "1" : "0" },
       { key: "callmebot_phone", el: "bb-callmebot-phone" },
       { key: "callmebot_apikey", el: "bb-callmebot-apikey" },
+      { key: "callmebot_signal_enabled", value: signalEnabledEl && signalEnabledEl.checked ? "1" : "0" },
+      { key: "callmebot_signal_phone", el: "bb-callmebot-signal-phone" },
+      { key: "callmebot_signal_apikey", el: "bb-callmebot-signal-apikey" },
     ];
     for (var c = 0; c < callmebotRows.length; c++) {
       var row = callmebotRows[c];
@@ -172,11 +186,11 @@
     setMsg("Uploaded.");
   }
 
-  async function testCallMeBot() {
+  async function testCallMeBot(channel) {
     setMsg("");
     await window.BB.requireAdmin();
     var sb = await window.BB.getSupabase();
-    var r = await sb.rpc("admin_test_order_whatsapp");
+    var r = await sb.rpc("admin_test_order_notify", { p_channel: channel || "whatsapp" });
     if (r.error) throw r.error;
     setMsg(r.data || "Test sent.");
   }
@@ -192,7 +206,15 @@
     if (testBtn) {
       testBtn.addEventListener("click", function () {
         save()
-          .then(function () { return testCallMeBot(); })
+          .then(function () { return testCallMeBot("whatsapp"); })
+          .catch(function (e) { setMsg(e.message || String(e)); });
+      });
+    }
+    var signalTestBtn = document.getElementById("bb-callmebot-signal-test");
+    if (signalTestBtn) {
+      signalTestBtn.addEventListener("click", function () {
+        save()
+          .then(function () { return testCallMeBot("signal"); })
           .catch(function (e) { setMsg(e.message || String(e)); });
       });
     }
