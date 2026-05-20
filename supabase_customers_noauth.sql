@@ -172,6 +172,11 @@ grant execute on function public.customer_me(uuid) to anon, authenticated;
 alter table public.orders
 add column if not exists customer_id uuid null references public.customers(id) on delete set null;
 
+-- Safe re-run: DROP before CREATE when return type / signature changed
+drop function if exists public.customer_list_orders(uuid);
+drop function if exists public.customer_get_order(uuid, uuid);
+drop function if exists public.customer_create_order(uuid, text, text, text, text, jsonb);
+
 -- 8) Customer creates order via RPC (inserts order + items + applies inventory)
 -- cart_items: [{product_id, qty, unit_price_iqd, color, age_range}]
 create or replace function public.customer_create_order(
@@ -294,7 +299,7 @@ $$;
 grant execute on function public.customer_create_order(uuid, text, text, text, text, jsonb) to anon, authenticated;
 
 -- 9) Customer list own orders
-create or replace function public.customer_list_orders(p_token uuid)
+create function public.customer_list_orders(p_token uuid)
 returns table(id uuid, status text, total numeric, currency text, shipping_name text, created_at timestamptz)
 language sql
 security definer
@@ -312,7 +317,7 @@ $$;
 grant execute on function public.customer_list_orders(uuid) to anon, authenticated;
 
 -- 10) Customer get order details for tracking page
-create or replace function public.customer_get_order(p_token uuid, p_order_id uuid)
+create function public.customer_get_order(p_token uuid, p_order_id uuid)
 returns jsonb
 language plpgsql
 security definer
