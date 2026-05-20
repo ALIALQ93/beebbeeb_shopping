@@ -195,6 +195,7 @@ declare
   oi record;
   cur int;
   ship_fee int := 0;
+  city_trim text;
 begin
   select * into me from public.customer_me(p_token) limit 1;
   if me.customer_id is null then
@@ -224,8 +225,12 @@ begin
     total_amount := total_amount + greatest(1, (it->>'qty')::int) * greatest(0, (it->>'unit_price_iqd')::numeric);
   end loop;
 
-  -- Shipping fee from shipping_rates (fallback 5000)
-  select coalesce((select fee_iqd from public.shipping_rates where city = p_shipping_city limit 1), 5000)
+  -- Shipping fee from shipping_rates (trim city; fallback 5000 IQD — same as checkout)
+  city_trim := trim(coalesce(p_shipping_city, ''));
+  select coalesce(
+    (select fee_iqd from public.shipping_rates where trim(city) = city_trim limit 1),
+    5000
+  )
   into ship_fee;
 
   update public.orders
@@ -323,7 +328,7 @@ begin
     raise exception 'not logged in';
   end if;
 
-  select id, status, total, currency, shipping_name, shipping_phone, shipping_city, shipping_address, created_at
+  select id, status, total, currency, shipping_name, shipping_phone, shipping_city, shipping_address, shipping_fee_iqd, created_at
   into o
   from public.orders
   where id = p_order_id and customer_id = me.customer_id
@@ -363,6 +368,7 @@ begin
       'shipping_phone', o.shipping_phone,
       'shipping_city', o.shipping_city,
       'shipping_address', o.shipping_address,
+      'shipping_fee_iqd', coalesce(o.shipping_fee_iqd, 0),
       'created_at', o.created_at
     ),
     'items',

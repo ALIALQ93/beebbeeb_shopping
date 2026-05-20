@@ -26,6 +26,21 @@
     return String(s == null ? "" : s);
   }
 
+  /** Subtotal from line items; shipping from DB or inferred; grand = order.total */
+  function orderInvoiceTotals(order, items) {
+    var o = order || {};
+    var subtotal = (items || []).reduce(function (sum, it) {
+      return sum + Number(it.unit_price_iqd || 0) * Number(it.qty || 0);
+    }, 0);
+    var ship = Number(o.shipping_fee_iqd);
+    if (!isFinite(ship) || ship < 0) ship = 0;
+    var grand = Number(o.total);
+    if (!isFinite(grand) || grand < 0) grand = 0;
+    if (ship <= 0 && grand > subtotal) ship = grand - subtotal;
+    if (grand <= 0 && subtotal + ship > 0) grand = subtotal + ship;
+    return { subtotal: subtotal, shipping: ship, grand: grand };
+  }
+
   function buildPrintHtml(payload) {
     var o = payload.order || {};
     var items = payload.items || [];
@@ -56,8 +71,7 @@
       .join("");
 
     var created = o.created_at ? new Date(o.created_at).toLocaleString("ar-IQ") : "";
-    var ship = Number(o.shipping_fee_iqd || 0);
-    var subtotal = Math.max(0, Number(o.total || 0) - ship);
+    var totals = orderInvoiceTotals(o, items);
 
     return (
       "<!doctype html>" +
@@ -106,13 +120,13 @@
         rows +
         "</tbody></table>" +
         "<div style='margin-top:10px; text-align:left' class='muted'>المجموع الفرعي: " +
-        escapeHtml(fmtIQD(subtotal)) +
+        escapeHtml(fmtIQD(totals.subtotal)) +
         "</div>" +
-        "<div style='margin-top:6px; text-align:left' class='muted'>الشحن: " +
-        escapeHtml(fmtIQD(ship)) +
+        "<div style='margin-top:6px; text-align:left' class='muted'>أجور التوصيل: " +
+        escapeHtml(fmtIQD(totals.shipping)) +
         "</div>" +
         "<div style='margin-top:8px; text-align:left' class='tot'>الإجمالي: " +
-        escapeHtml(fmtIQD(o.total || 0)) +
+        escapeHtml(fmtIQD(totals.grand)) +
         "</div>" +
         "</div>" +
         "</body></html>"
@@ -144,8 +158,7 @@
     var o = payload.order || {};
     var items = payload.items || [];
     var created = o.created_at ? new Date(o.created_at).toLocaleString("ar-IQ") : "";
-    var ship = Number(o.shipping_fee_iqd || 0);
-    var subtotal = Math.max(0, Number(o.total || 0) - ship);
+    var totals = orderInvoiceTotals(o, items);
     var orderShort = String(o.id || "").slice(0, 8);
     var rows = items
       .map(function (it) {
@@ -255,13 +268,13 @@
       "</tbody></table>" +
       "<div class='sum'><div class='sumBox'>" +
       "<div class='sumRow'><span>المجموع الفرعي</span><b>" +
-      escapeHtml(fmtIQD(subtotal)) +
+      escapeHtml(fmtIQD(totals.subtotal)) +
       "</b></div>" +
-      "<div class='sumRow'><span>الشحن</span><b>" +
-      escapeHtml(fmtIQD(ship)) +
+      "<div class='sumRow'><span>أجور التوصيل</span><b>" +
+      escapeHtml(fmtIQD(totals.shipping)) +
       "</b></div>" +
       "<div class='sumRow sumTot'><span>الإجمالي</span><span>" +
-      escapeHtml(fmtIQD(o.total || 0)) +
+      escapeHtml(fmtIQD(totals.grand)) +
       "</span></div>" +
       "</div></div>" +
       "</div>" +
