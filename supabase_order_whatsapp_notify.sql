@@ -1,14 +1,11 @@
--- Order alerts via CallMeBot: WhatsApp + Signal (server-side, on new order)
--- Run once in Supabase SQL Editor after orders + app_settings exist.
+-- Order WhatsApp alerts via GREEN-API (console.green-api.com)
+-- Run / re-run in Supabase SQL Editor after orders + app_settings exist.
 --
--- WhatsApp: https://www.callmebot.com/blog/free-api-whatsapp-messages/
--- Signal:   https://www.callmebot.com/blog/free-api-signal-messages/
---
--- Admin → Content → configure each channel → Save → Send test message
+-- Setup: Admin → Content → GREEN-API → paste apiUrl, idInstance, apiTokenInstance, notify phone → Save → Test
 
 create extension if not exists pg_net with schema extensions;
 
--- Hide API keys from public/anon reads
+-- Hide tokens from public/anon reads
 drop policy if exists "app_settings_select_all" on public.app_settings;
 
 drop policy if exists "app_settings_select_public" on public.app_settings;
@@ -16,7 +13,13 @@ create policy "app_settings_select_public"
 on public.app_settings
 for select
 to anon, authenticated
-using (key not in ('callmebot_apikey', 'callmebot_signal_apikey'));
+using (
+  key not in (
+    'greenapi_api_token',
+    'callmebot_apikey',
+    'callmebot_signal_apikey'
+  )
+);
 
 drop policy if exists "app_settings_select_sensitive_admin" on public.app_settings;
 create policy "app_settings_select_sensitive_admin"
@@ -24,7 +27,11 @@ on public.app_settings
 for select
 to authenticated
 using (
-  key in ('callmebot_apikey', 'callmebot_signal_apikey')
+  key in (
+    'greenapi_api_token',
+    'callmebot_apikey',
+    'callmebot_signal_apikey'
+  )
   and exists (
     select 1 from public.profiles p
     where p.id = auth.uid() and p.is_admin = true
@@ -33,42 +40,12 @@ using (
 
 insert into public.app_settings (key, value)
 values
-  ('callmebot_enabled', '0'),
-  ('callmebot_phone', ''),
-  ('callmebot_apikey', ''),
-  ('callmebot_signal_enabled', '0'),
-  ('callmebot_signal_phone', ''),
-  ('callmebot_signal_apikey', '')
+  ('greenapi_enabled', '0'),
+  ('greenapi_url', 'https://7107.api.greenapi.com'),
+  ('greenapi_instance_id', ''),
+  ('greenapi_api_token', ''),
+  ('greenapi_notify_phone', '')
 on conflict (key) do nothing;
-
-create or replace function public.url_encode_utf8(p text)
-returns text
-language plpgsql
-immutable
-as $$
-declare
-  raw bytea := convert_to(coalesce(p, ''), 'UTF8');
-  result text := '';
-  i int;
-  b int;
-  c text;
-begin
-  if length(raw) = 0 then
-    return '';
-  end if;
-
-  for i in 0..(length(raw) - 1) loop
-    b := get_byte(raw, i);
-    c := chr(b);
-    if c ~ '^[A-Za-z0-9._~-]$' then
-      result := result || c;
-    else
-      result := result || '%' || upper(lpad(to_hex(b), 2, '0'));
-    end if;
-  end loop;
-  return result;
-end;
-$$;
 
 create or replace function public.app_setting(p_key text)
 returns text
@@ -91,17 +68,13 @@ as $$
   select trim(public.app_setting(p_key)) in ('1', 'true', 'yes', 'on');
 $$;
 
--- Signal: phone with country code (+49...) or UUID; do not strip to digits only
-create or replace function public.format_callmebot_signal_phone(p text)
+-- WhatsApp chatId: digits only + @c.us (e.g. 9647777010004@c.us)
+create or replace function public.greenapi_chat_id(p_phone text)
 returns text
 language sql
 immutable
 as $$
-  select case
-    when trim(coalesce(p, '')) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-      then trim(p)
-    else regexp_replace(trim(coalesce(p, '')), '\s+', '', 'g')
-  end;
+  select nullif(regexp_replace(trim(coalesce(p_phone, '')), '[^0-9]', '', 'g'), '') || '@c.us';
 $$;
 
 create or replace function public.build_order_notify_message(p_order_id uuid)
@@ -152,53 +125,38 @@ begin
 end;
 $$;
 
-create or replace function public.callmebot_send_whatsapp(p_phone text, p_apikey text, p_text text)
+create or replace function public.greenapi_send_message(p_chat_id text, p_message text)
 returns void
 language plpgsql
 security definer
 set search_path = public, extensions
 as $$
 declare
-  phone text;
+  base_url text;
+  instance_id text;
+  api_token text;
   url text;
+  body jsonb;
 begin
-  phone := regexp_replace(trim(coalesce(p_phone, '')), '[^0-9]', '', 'g');
-  if phone = '' or trim(coalesce(p_apikey, '')) = '' or coalesce(p_text, '') = '' then
+  base_url := rtrim(trim(public.app_setting('greenapi_url')), '/');
+  instance_id := trim(public.app_setting('greenapi_instance_id'));
+  api_token := trim(public.app_setting('greenapi_api_token'));
+
+  if base_url = '' or instance_id = '' or api_token = '' then
+    return;
+  end if;
+  if coalesce(p_chat_id, '') = '' or coalesce(p_message, '') = '' then
     return;
   end if;
 
-  url :=
-    'https://api.callmebot.com/whatsapp.php?phone=' ||
-    public.url_encode_utf8(phone) ||
-    '&text=' || public.url_encode_utf8(p_text) ||
-    '&apikey=' || public.url_encode_utf8(trim(p_apikey));
+  url := base_url || '/waInstance' || instance_id || '/sendMessage/' || api_token;
+  body := jsonb_build_object('chatId', p_chat_id, 'message', p_message);
 
-  perform net.http_get(url := url);
-end;
-$$;
-
-create or replace function public.callmebot_send_signal(p_phone text, p_apikey text, p_text text)
-returns void
-language plpgsql
-security definer
-set search_path = public, extensions
-as $$
-declare
-  phone text;
-  url text;
-begin
-  phone := public.format_callmebot_signal_phone(p_phone);
-  if phone = '' or trim(coalesce(p_apikey, '')) = '' or coalesce(p_text, '') = '' then
-    return;
-  end if;
-
-  url :=
-    'https://signal.callmebot.com/signal/send.php?phone=' ||
-    public.url_encode_utf8(phone) ||
-    '&apikey=' || public.url_encode_utf8(trim(p_apikey)) ||
-    '&text=' || public.url_encode_utf8(p_text);
-
-  perform net.http_get(url := url);
+  perform net.http_post(
+    url := url,
+    headers := jsonb_build_object('Content-Type', 'application/json'),
+    body := body
+  );
 end;
 $$;
 
@@ -210,40 +168,28 @@ set search_path = public, extensions
 as $$
 declare
   msg text;
+  chat_id text;
 begin
+  if not public.setting_is_enabled('greenapi_enabled') then
+    return;
+  end if;
+
   msg := public.build_order_notify_message(p_order_id);
   if msg is null then
     return;
   end if;
 
-  if public.setting_is_enabled('callmebot_enabled') then
-    begin
-      perform public.callmebot_send_whatsapp(
-        public.app_setting('callmebot_phone'),
-        public.app_setting('callmebot_apikey'),
-        msg
-      );
-    exception
-      when others then
-        raise notice 'notify whatsapp failed for %: %', p_order_id, sqlerrm;
-    end;
+  chat_id := public.greenapi_chat_id(public.app_setting('greenapi_notify_phone'));
+  if chat_id is null then
+    return;
   end if;
 
-  if public.setting_is_enabled('callmebot_signal_enabled') then
-    begin
-      perform public.callmebot_send_signal(
-        public.app_setting('callmebot_signal_phone'),
-        public.app_setting('callmebot_signal_apikey'),
-        msg
-      );
-    exception
-      when others then
-        raise notice 'notify signal failed for %: %', p_order_id, sqlerrm;
-    end;
-  end if;
-exception
-  when others then
-    raise notice 'notify_order_whatsapp failed for %: %', p_order_id, sqlerrm;
+  begin
+    perform public.greenapi_send_message(chat_id, msg);
+  exception
+    when others then
+      raise notice 'greenapi notify failed for %: %', p_order_id, sqlerrm;
+  end;
 end;
 $$;
 
@@ -269,63 +215,55 @@ after insert or update on public.orders
 for each row
 execute function public.trg_orders_whatsapp_notify();
 
-create or replace function public.admin_test_order_notify(p_channel text default 'whatsapp')
+create or replace function public.admin_test_order_notify(p_channel text default 'greenapi')
 returns text
 language plpgsql
 security definer
 set search_path = public, extensions
 as $$
 declare
-  channel text := lower(trim(coalesce(p_channel, 'whatsapp')));
-  msg text := 'اختبار BeebBeeb: إشعارات الطلبات تعمل بنجاح.';
+  channel text := lower(trim(coalesce(p_channel, 'greenapi')));
+  msg text := 'اختبار BeebBeeb: إشعارات الطلبات عبر GREEN-API تعمل بنجاح.';
+  chat_id text;
 begin
   if not public.is_admin() then
     raise exception 'admin only';
   end if;
 
-  if channel = 'signal' then
-    if not public.setting_is_enabled('callmebot_signal_enabled') then
-      return 'إشعارات Signal غير مفعّلة. فعّلها واحفظ الإعدادات.';
-    end if;
-    if trim(public.app_setting('callmebot_signal_phone')) = ''
-       or trim(public.app_setting('callmebot_signal_apikey')) = '' then
-      return 'أدخل رقم Signal (أو UUID) ومفتاح API ثم احفظ.';
-    end if;
-    perform public.callmebot_send_signal(
-      public.app_setting('callmebot_signal_phone'),
-      public.app_setting('callmebot_signal_apikey'),
-      msg
-    );
-    return 'تم إرسال رسالة الاختبار إلى Signal.';
+  if channel not in ('greenapi', 'whatsapp') then
+    return 'قناة غير معروفة. استخدم greenapi.';
   end if;
 
-  if not public.setting_is_enabled('callmebot_enabled') then
-    return 'إشعارات واتساب غير مفعّلة. فعّلها واحفظ الإعدادات.';
+  if not public.setting_is_enabled('greenapi_enabled') then
+    return 'إشعارات GREEN-API غير مفعّلة. فعّلها واحفظ الإعدادات.';
   end if;
-  if trim(public.app_setting('callmebot_phone')) = ''
-     or trim(public.app_setting('callmebot_apikey')) = '' then
-    return 'أدخل رقم الواتساب ومفتاح CallMeBot ثم احفظ.';
+
+  if trim(public.app_setting('greenapi_url')) = ''
+     or trim(public.app_setting('greenapi_instance_id')) = ''
+     or trim(public.app_setting('greenapi_api_token')) = '' then
+    return 'أدخل apiUrl و idInstance و apiTokenInstance من console.green-api.com ثم احفظ.';
   end if;
-  perform public.callmebot_send_whatsapp(
-    public.app_setting('callmebot_phone'),
-    public.app_setting('callmebot_apikey'),
-    msg
-  );
-  return 'تم إرسال رسالة الاختبار إلى واتساب.';
+
+  chat_id := public.greenapi_chat_id(public.app_setting('greenapi_notify_phone'));
+  if chat_id is null then
+    return 'أدخل رقم واتساب المستلم (مع رمز الدولة، مثل 9647777010004).';
+  end if;
+
+  perform public.greenapi_send_message(chat_id, msg);
+  return 'تم إرسال رسالة الاختبار عبر GREEN-API إلى ' || chat_id;
 exception
   when others then
     return 'فشل الإرسال: ' || sqlerrm;
 end;
 $$;
 
--- Backward-compatible alias
 create or replace function public.admin_test_order_whatsapp()
 returns text
 language sql
 security definer
 set search_path = public
 as $$
-  select public.admin_test_order_notify('whatsapp');
+  select public.admin_test_order_notify('greenapi');
 $$;
 
 grant execute on function public.admin_test_order_notify(text) to authenticated;

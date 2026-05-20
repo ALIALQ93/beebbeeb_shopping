@@ -1,28 +1,16 @@
 # beebbeeb_shopping
 
-## إشعارات الطلبات (CallMeBot)
+## إشعارات الطلبات على واتساب (GREEN-API)
 
-يدعم **واتساب** و/أو **Signal** عند كل طلب جديد.
+1. أنشئ Instance في [console.green-api.com](https://console.green-api.com) واربطه بواتساب (**Authorized**).
+2. في Supabase → **SQL Editor** نفّذ `supabase_order_whatsapp_notify.sql` (أعد التشغيل بعد كل تحديث للملف).
+3. **Admin → Content → Order alerts (GREEN-API)**:
+   - **apiUrl** — من لوحة GREEN-API (مثل `https://7107.api.greenapi.com`)
+   - **idInstance** — رقم الـ Instance
+   - **apiTokenInstance** — التوكن من اللوحة
+   - **Notify phone** — رقم المستلم (أرقام فقط، مثل `9647777010004` — عادة نفس رقم الـ Instance لإرسال التنبيه لنفسك)
+4. فعّل الخيار → **Save** → **Test WhatsApp (GREEN-API)**
 
-### 1) Supabase
+عند كل طلب جديد تُرسل رسالة عبر `sendMessage` من السيرفر (pg_net).
 
-نفّذ مرة واحدة في **SQL Editor**: `supabase_order_whatsapp_notify.sql`
-
-### 2) تفعيل CallMeBot
-
-| القناة | التسجيل |
-|--------|---------|
-| WhatsApp | [callmebot.com/whatsapp](https://www.callmebot.com/blog/free-api-whatsapp-messages/) |
-| Signal | [callmebot.com/signal](https://www.callmebot.com/blog/free-api-signal-messages/) |
-
-لكل قناة مفتاح API خاص بها.
-
-### 3) لوحة الإدارة
-
-**Admin → Content → Order alerts**
-
-- **WhatsApp:** رقم بدون `+` (مثل `9647xxxxxxxx`)
-- **Signal:** رقم مع رمز الدولة (مثل `+9647...`) أو **UUID** من Signal
-- فعّل القناة، الصق المفتاح، **Save**، ثم **Test WhatsApp** أو **Test Signal**
-
-يمكن تفعيل القناتين معاً؛ عند الطلب تُرسل رسالة لكل قناة مفعّلة.
+**أمان:** لا تضع `apiTokenInstance` في الكود أو Git — فقط من لوحة الإدارة.

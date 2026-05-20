@@ -47,12 +47,11 @@
       "help_subtitle_en",
       "help_whatsapp_url",
       "help_call_phone",
-      "callmebot_enabled",
-      "callmebot_phone",
-      "callmebot_apikey",
-      "callmebot_signal_enabled",
-      "callmebot_signal_phone",
-      "callmebot_signal_apikey",
+      "greenapi_enabled",
+      "greenapi_url",
+      "greenapi_instance_id",
+      "greenapi_api_token",
+      "greenapi_notify_phone",
     ];
     var map = await readSettings(sb, keys);
     (document.getElementById("bb-hero-badge-ar") || {}).value = map.home_hero_badge_ar || "";
@@ -76,20 +75,16 @@
     (document.getElementById("bb-help-sub-en") || {}).value = map.help_subtitle_en || "";
     (document.getElementById("bb-help-whatsapp") || {}).value = map.help_whatsapp_url || "";
     (document.getElementById("bb-help-call") || {}).value = map.help_call_phone || "";
-    var enabledEl = document.getElementById("bb-callmebot-enabled");
-    if (enabledEl) {
-      var en = map.callmebot_enabled || "0";
-      enabledEl.checked = en === "1" || en === "true" || en === "yes" || en === "on";
+    var greenEnabledEl = document.getElementById("bb-greenapi-enabled");
+    if (greenEnabledEl) {
+      var gen = map.greenapi_enabled || "0";
+      greenEnabledEl.checked = gen === "1" || gen === "true" || gen === "yes" || gen === "on";
     }
-    (document.getElementById("bb-callmebot-phone") || {}).value = map.callmebot_phone || "";
-    (document.getElementById("bb-callmebot-apikey") || {}).value = map.callmebot_apikey || "";
-    var signalEnabledEl = document.getElementById("bb-callmebot-signal-enabled");
-    if (signalEnabledEl) {
-      var sen = map.callmebot_signal_enabled || "0";
-      signalEnabledEl.checked = sen === "1" || sen === "true" || sen === "yes" || sen === "on";
-    }
-    (document.getElementById("bb-callmebot-signal-phone") || {}).value = map.callmebot_signal_phone || "";
-    (document.getElementById("bb-callmebot-signal-apikey") || {}).value = map.callmebot_signal_apikey || "";
+    (document.getElementById("bb-greenapi-url") || {}).value =
+      map.greenapi_url || "https://7107.api.greenapi.com";
+    (document.getElementById("bb-greenapi-instance") || {}).value = map.greenapi_instance_id || "";
+    (document.getElementById("bb-greenapi-token") || {}).value = map.greenapi_api_token || "";
+    (document.getElementById("bb-greenapi-notify-phone") || {}).value = map.greenapi_notify_phone || "";
   }
 
   async function save() {
@@ -121,23 +116,21 @@
       { key: "help_call_phone", el: "bb-help-call" },
     ];
 
-    var enabledEl = document.getElementById("bb-callmebot-enabled");
-    var signalEnabledEl = document.getElementById("bb-callmebot-signal-enabled");
-    var callmebotRows = [
-      { key: "callmebot_enabled", value: enabledEl && enabledEl.checked ? "1" : "0" },
-      { key: "callmebot_phone", el: "bb-callmebot-phone" },
-      { key: "callmebot_apikey", el: "bb-callmebot-apikey" },
-      { key: "callmebot_signal_enabled", value: signalEnabledEl && signalEnabledEl.checked ? "1" : "0" },
-      { key: "callmebot_signal_phone", el: "bb-callmebot-signal-phone" },
-      { key: "callmebot_signal_apikey", el: "bb-callmebot-signal-apikey" },
+    var greenEnabledEl = document.getElementById("bb-greenapi-enabled");
+    var greenRows = [
+      { key: "greenapi_enabled", value: greenEnabledEl && greenEnabledEl.checked ? "1" : "0" },
+      { key: "greenapi_url", el: "bb-greenapi-url" },
+      { key: "greenapi_instance_id", el: "bb-greenapi-instance" },
+      { key: "greenapi_api_token", el: "bb-greenapi-token" },
+      { key: "greenapi_notify_phone", el: "bb-greenapi-notify-phone" },
     ];
-    for (var c = 0; c < callmebotRows.length; c++) {
-      var row = callmebotRows[c];
-      var val = row.el
-        ? (document.getElementById(row.el)?.value || "").trim()
-        : row.value;
-      var cu = await upsertSetting(sb, row.key, val);
-      if (cu.error) throw cu.error;
+    for (var g = 0; g < greenRows.length; g++) {
+      var grow = greenRows[g];
+      var gval = grow.el
+        ? (document.getElementById(grow.el)?.value || "").trim()
+        : grow.value;
+      var gu = await upsertSetting(sb, grow.key, gval);
+      if (gu.error) throw gu.error;
     }
 
     for (var i = 0; i < rows.length; i++) {
@@ -186,11 +179,11 @@
     setMsg("Uploaded.");
   }
 
-  async function testCallMeBot(channel) {
+  async function testGreenApi() {
     setMsg("");
     await window.BB.requireAdmin();
     var sb = await window.BB.getSupabase();
-    var r = await sb.rpc("admin_test_order_notify", { p_channel: channel || "whatsapp" });
+    var r = await sb.rpc("admin_test_order_notify", { p_channel: "greenapi" });
     if (r.error) throw r.error;
     setMsg(r.data || "Test sent.");
   }
@@ -202,19 +195,11 @@
     if (reloadBtn) reloadBtn.addEventListener("click", function () { load().catch(function (e) { setMsg(e.message || String(e)); }); });
     var uploadBtn = document.getElementById("bb-hero-img-upload");
     if (uploadBtn) uploadBtn.addEventListener("click", function () { uploadHeroImage().catch(function (e) { setMsg(e.message || String(e)); }); });
-    var testBtn = document.getElementById("bb-callmebot-test");
+    var testBtn = document.getElementById("bb-greenapi-test");
     if (testBtn) {
       testBtn.addEventListener("click", function () {
         save()
-          .then(function () { return testCallMeBot("whatsapp"); })
-          .catch(function (e) { setMsg(e.message || String(e)); });
-      });
-    }
-    var signalTestBtn = document.getElementById("bb-callmebot-signal-test");
-    if (signalTestBtn) {
-      signalTestBtn.addEventListener("click", function () {
-        save()
-          .then(function () { return testCallMeBot("signal"); })
+          .then(function () { return testGreenApi(); })
           .catch(function (e) { setMsg(e.message || String(e)); });
       });
     }
