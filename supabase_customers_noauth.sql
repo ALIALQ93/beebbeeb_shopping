@@ -269,6 +269,19 @@ begin
   set inventory_applied = true, confirmed_at = coalesce(confirmed_at, now()), status = coalesce(status,'pending')
   where id = oid;
 
+  -- WhatsApp alert (GREEN-API) after subtotal, shipping_fee_iqd and total are saved
+  begin
+    perform public.notify_order_whatsapp(
+      oid,
+      total_amount + greatest(0, coalesce(ship_fee, 0)),
+      greatest(0, coalesce(ship_fee, 0))
+    );
+  exception
+    when undefined_function then null;
+    when others then
+      raise notice 'notify_order_whatsapp skipped: %', sqlerrm;
+  end;
+
   return oid;
 end;
 $$;

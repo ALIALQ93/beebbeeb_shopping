@@ -77,7 +77,27 @@ as $$
   select nullif(regexp_replace(trim(coalesce(p_phone, '')), '[^0-9]', '', 'g'), '') || '@c.us';
 $$;
 
-create or replace function public.build_order_notify_message(p_order_id uuid)
+-- Ensure shipping column exists (idempotent)
+do $$
+begin
+  if to_regclass('public.orders') is not null then
+    execute 'alter table public.orders add column if not exists shipping_fee_iqd int not null default 0';
+  end if;
+end $$;
+
+create or replace function public.format_iqd_amount(p_amount numeric)
+returns text
+language sql
+immutable
+as $$
+  select to_char(round(coalesce(p_amount, 0)), 'FM999,999,999');
+$$;
+
+create or replace function public.build_order_notify_message(
+  p_order_id uuid,
+  p_total numeric default null,
+  p_shipping_fee_iqd numeric default null
+)
 returns text
 language plpgsql
 stable
@@ -87,6 +107,9 @@ as $$
 declare
   o record;
   item_count int;
+  subtotal numeric := 0;
+  ship numeric := 0;
+  grand numeric := 0;
 begin
   select
     id,
@@ -106,10 +129,21 @@ begin
     return null;
   end if;
 
-  select count(*)::int
-  into item_count
-  from public.order_items
-  where order_id = p_order_id;
+  select
+    count(*)::int,
+    coalesce(sum(greatest(1, oi.qty) * greatest(0, oi.unit_price_iqd)), 0)
+  into item_count, subtotal
+  from public.order_items oi
+  where oi.order_id = p_order_id;
+
+  ship := coalesce(p_shipping_fee_iqd, o.shipping_fee_iqd, 0)::numeric;
+  grand := coalesce(nullif(p_total, 0), nullif(o.total, 0), subtotal + ship);
+
+  if ship <= 0 and grand > subtotal then
+    ship := grand - subtotal;
+  elsif grand < subtotal + ship then
+    grand := subtotal + ship;
+  end if;
 
   return
     'طلب جديد - BeebBeeb' || E'\n' ||
@@ -119,9 +153,10 @@ begin
     'هاتف: ' || coalesce(o.shipping_phone, '-') || E'\n' ||
     'المدينة: ' || coalesce(o.shipping_city, '-') || E'\n' ||
     'العنوان: ' || coalesce(o.shipping_address, '-') || E'\n' ||
-    'المنتجات: ' || item_count::text || E'\n' ||
-    'التوصيل: ' || coalesce(o.shipping_fee_iqd, 0)::text || ' IQD' || E'\n' ||
-    'المجموع: ' || coalesce(o.total, 0)::text || ' ' || coalesce(o.currency, 'IQD');
+    'عدد المنتجات: ' || item_count::text || E'\n' ||
+    'مجموع المنتجات: ' || public.format_iqd_amount(subtotal) || ' IQD' || E'\n' ||
+    'أجور التوصيل: ' || public.format_iqd_amount(ship) || ' IQD' || E'\n' ||
+    'الإجمالي: ' || public.format_iqd_amount(grand) || ' ' || coalesce(o.currency, 'IQD');
 end;
 $$;
 
@@ -160,7 +195,11 @@ begin
 end;
 $$;
 
-create or replace function public.notify_order_whatsapp(p_order_id uuid)
+create or replace function public.notify_order_whatsapp(
+  p_order_id uuid,
+  p_total numeric default null,
+  p_shipping_fee_iqd numeric default null
+)
 returns void
 language plpgsql
 security definer
@@ -174,7 +213,7 @@ begin
     return;
   end if;
 
-  msg := public.build_order_notify_message(p_order_id);
+  msg := public.build_order_notify_message(p_order_id, p_total, p_shipping_fee_iqd);
   if msg is null then
     return;
   end if;
@@ -193,27 +232,12 @@ begin
 end;
 $$;
 
-create or replace function public.trg_orders_whatsapp_notify()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  if NEW.inventory_applied is true
-     and (TG_OP = 'INSERT' or coalesce(OLD.inventory_applied, false) is not true)
-  then
-    perform public.notify_order_whatsapp(NEW.id);
-  end if;
-  return NEW;
-end;
-$$;
-
+-- Remove old trigger (was firing before totals were reliable)
 drop trigger if exists orders_whatsapp_notify on public.orders;
-create trigger orders_whatsapp_notify
-after insert or update on public.orders
-for each row
-execute function public.trg_orders_whatsapp_notify();
+drop function if exists public.trg_orders_whatsapp_notify();
+
+-- Notification is sent from customer_create_order() after totals are saved.
+-- Also re-run supabase_customers_noauth.sql (customer_create_order) once after this file.
 
 create or replace function public.admin_test_order_notify(p_channel text default 'greenapi')
 returns text
