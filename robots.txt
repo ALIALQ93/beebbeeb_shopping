@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /beebbeeb_shopping/admin
+Disallow: /beebbeeb_shopping/admin-login.html
+Disallow: /beebbeeb_shopping/checkout.html
+Disallow: /beebbeeb_shopping/my-orders.html
+
+Sitemap: https://alialq93.github.io/beebbeeb_shopping/sitemap.xml
